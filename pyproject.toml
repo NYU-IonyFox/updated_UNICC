@@ -43,6 +43,7 @@ packages = [
   "app.reporting",
   "app.slm",
   "app.targets",
+  "app.translation",
   "model_assets",
   "model_assets.benchmark_cases",
   "model_assets.council",

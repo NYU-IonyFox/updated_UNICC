@@ -1,0 +1,89 @@
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+from app.anchors.anchor_loader import build_anchor_table, load_anchors
+from app.experts.base import BaseExpert, compute_overall
+
+_DIMENSIONS = [
+    {"name": "jailbreak_resistance",        "tier": "CORE"},
+    {"name": "prompt_injection_robustness", "tier": "CORE"},
+    {"name": "multilingual_jailbreak",      "tier": "CORE"},
+    {"name": "multi_turn_stability",        "tier": "IMPORTANT"},
+    {"name": "tool_agent_manipulation",     "tier": "IMPORTANT"},
+    {"name": "tier1_attack_surface",        "tier": "CORE"},
+    {"name": "tier2_injection_escalation",  "tier": "CORE"},
+    {"name": "tier3_chain_attack",          "tier": "IMPORTANT"},
+]
+
+_PROMPT_PATH = (
+    Path(__file__).resolve().parent.parent.parent
+    / "model_assets" / "prompts" / "expert_1_system_prompt.txt"
+)
+_ANCHORS_PATH = (
+    Path(__file__).resolve().parent.parent / "anchors" / "framework_anchors_v2.json"
+)
+
+
+class AdversarialSecurityExpert(BaseExpert):
+    expert_id = "expert_adversarial_security"
+    dimensions = _DIMENSIONS
+
+    def assess(self, evidence_bundle: dict) -> dict:
+        if self.execution_mode() == "rules":
+            return self._mock_result()
+        return self._assess_llm(evidence_bundle)
+
+    def _assess_llm(self, evidence_bundle: dict) -> dict:
+        system_prompt = self._build_system_prompt()
+        items = self._call_llm(system_prompt, evidence_bundle)
+        return self._parse_response(items)
+
+    def _build_system_prompt(self) -> str:
+        with open(_PROMPT_PATH, encoding="utf-8") as f:
+            prompt = f.read()
+        anchors = load_anchors(str(_ANCHORS_PATH))
+        table = build_anchor_table(self.expert_id, anchors)
+        return prompt.replace("{{anchor_table}}", table)
+
+    def _call_llm(self, system_prompt: str, evidence_bundle: dict) -> list:
+        api_key = os.getenv("ANTHROPIC_API_KEY") or evidence_bundle.get("api_key", "")
+        user_content = json.dumps(evidence_bundle, ensure_ascii=False)
+        try:
+            import anthropic
+        except ImportError as exc:
+            raise RuntimeError("anthropic package required for llm_api mode") from exc
+        client = anthropic.Anthropic(api_key=api_key)
+        msg = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2048,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_content}],
+        )
+        return json.loads(msg.content[0].text.strip())
+
+    def _parse_response(self, items: list) -> dict:
+        dim_tier = {d["name"]: d["tier"] for d in self.dimensions}
+        all_scores = [
+            {"tier": dim_tier.get(item.get("name", ""), "IMPORTANT"), "level": item.get("level", "LOW")}
+            for item in items
+        ]
+        triggered = [
+            {
+                "name": item["name"],
+                "tier": dim_tier.get(item["name"], "IMPORTANT"),
+                "level": item["level"],
+                "evidence_quality": item.get("evidence_quality", "Partial"),
+                "regulatory_anchor": item.get("regulatory_anchor", ""),
+                "reason": item.get("reason", ""),
+            }
+            for item in items
+            if item.get("level", "LOW") != "LOW"
+        ]
+        return {
+            "id": self.expert_id,
+            "overall": compute_overall(all_scores),
+            "triggered_dimensions": triggered,
+        }

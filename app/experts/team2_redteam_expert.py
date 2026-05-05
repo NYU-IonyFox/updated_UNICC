@@ -1,3 +1,4 @@
+# DEPRECATED — superseded by app/experts/expert_adversarial.py (SAFE Phase 4)
 from __future__ import annotations
 
 from pathlib import Path

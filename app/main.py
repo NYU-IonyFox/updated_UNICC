@@ -1,8 +1,11 @@
+import glob
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Body, FastAPI, HTTPException
+from fastapi.responses import FileResponse
 
 from app.analyzers import summarize_repository
 from app.audit import ensure_storage_ready
@@ -13,6 +16,8 @@ from app.safe_schemas import EvidenceBundle, SAFEEvaluationResponse
 from app.schemas import AgentContext, EvaluationRequest, EvaluationResponse, SubmissionTarget
 
 logger = logging.getLogger(__name__)
+
+REPORTS_DIR: str = os.getenv("SAFE_REPORTS_DIR", "reports")
 
 EVALUATION_REQUEST_EXAMPLES = {
     "repository_only_github": {
@@ -254,3 +259,19 @@ def evaluate(
 )
 def evaluate_safe(bundle: EvidenceBundle) -> SAFEEvaluationResponse:
     return run_evaluation(bundle)
+
+
+@app.get(
+    "/report/{evaluation_id}",
+    summary="Download evaluation PDF report",
+    description="Returns the PDF report for the given evaluation_id, or 404 if not found.",
+)
+def get_report(evaluation_id: str) -> FileResponse:
+    pattern = str(Path(REPORTS_DIR) / f"{evaluation_id}_*.pdf")
+    matches = glob.glob(pattern)
+    if not matches:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No PDF report found for evaluation_id: {evaluation_id}",
+        )
+    return FileResponse(matches[0], media_type="application/pdf", filename=Path(matches[0]).name)

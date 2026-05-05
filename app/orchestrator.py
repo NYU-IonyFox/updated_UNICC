@@ -510,6 +510,7 @@ from app.safe_schemas import (
     SAFEEvaluationResponse,
 )
 from app.safe_config import SAFE_VERSION
+from app.reporting.report_service import generate_reports
 
 # Maps new expert id → short id expected by arbitration.py
 _EXPERT_ID_MAP: dict[str, str] = {
@@ -643,7 +644,7 @@ def run_evaluation(evidence_bundle: EvidenceBundle) -> SAFEEvaluationResponse:
         if arb.get("convergent_risk_note"):
             additional.append(arb["convergent_risk_note"])
 
-        return SAFEEvaluationResponse(
+        safe_response = SAFEEvaluationResponse(
             evaluation_id=str(_uuid.uuid4()),
             timestamp=datetime.now(timezone.utc).isoformat(),
             safe_version=SAFE_VERSION,
@@ -663,6 +664,15 @@ def run_evaluation(evidence_bundle: EvidenceBundle) -> SAFEEvaluationResponse:
             translation_report=evidence_bundle.translation_report,
             report_path="",
         )
+
+        # L5 — Output (PDF + JSON); fail-closed: never crash the evaluation on report errors
+        try:
+            paths = generate_reports(safe_response)
+            safe_response = safe_response.model_copy(update={"report_path": paths["pdf_path"]})
+        except Exception:  # noqa: BLE001
+            pass  # report_path stays ""
+
+        return safe_response
 
     except Exception:  # noqa: BLE001
         from app.safe_schemas import TranslationReport

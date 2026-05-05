@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:/Users/24684/OneDrive/Desktop/NewUNICC\" log --oneline -5)",
+      "Bash(git -C \"C:/Users/24684/OneDrive/Desktop/NewUNICC\" remote -v)",
+      "Bash(git -C \"C:/Users/24684/OneDrive/Desktop/NewUNICC\" status)",
+      "Bash(git *)",
+      "Read(//c/Users/24684/OneDrive/Desktop/UNICC/**)",
+      "Read(//c/Users/24684/OneDrive/Desktop/update/**)",
+      "PowerShell(robocopy \"C:\\\\Users\\\\24684\\\\OneDrive\\\\Desktop\\\\update\" \"C:\\\\Users\\\\24684\\\\OneDrive\\\\Desktop\\\\NewUNICC\" /E /XD \".git\" /XF \"CLAUDE.md\" /NP /NFL 2>&1 | Select-String -Pattern \"^\\(New Dir|Files|Dirs|Bytes|Ended|Error|ROBOCOPY\\)\" | Select-Object -First 30)",
+      "Bash(python -c \"import app.main\")",
+      "Bash(timeout 8 uvicorn app.main:app --port 8000)",
+      "Bash(mv \"C:/Users/24684/OneDrive/Desktop/NewUNICC/frontend\" \"C:/Users/24684/OneDrive/Desktop/NewUNICC/frontend_archived\")",
+      "Bash(mkdir -p \"C:/Users/24684/OneDrive/Desktop/NewUNICC/frontend/static\" \"C:/Users/24684/OneDrive/Desktop/NewUNICC/frontend/templates\")",
+      "Bash(uvicorn app.main:app --port 8000)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(kill %1)",
+      "Bash(python *)",
+      "Bash(EXPERT_EXECUTION_MODE=rules python -m pytest tests/ -q --tb=short --ignore=tests/test_benchmark_repeated_runner.py --ignore=tests/test_benchmark_single_runner.py)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\24684\\\\OneDrive\\\\Desktop\\\\NewUNICC\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(xargs grep -l \"translation\\\\|multilingual\")",
+      "Bash(xargs grep -l \"build_probe_pack\")",
+      "Bash(dir C:\\\\Users\\\\24684\\\\OneDrive\\\\Desktop\\\\NewUNICC\\\\app *)",
+      "Bash(dir C:\\\\Users\\\\24684\\\\OneDrive\\\\Desktop\\\\NewUNICC\\\\tests *)",
+      "Bash(dir C:\\\\Users\\\\24684\\\\OneDrive\\\\Desktop\\\\NewUNICC *)",
+      "Bash(Get-ChildItem -Path . -Recurse -Force)"
+    ]
+  }
+}

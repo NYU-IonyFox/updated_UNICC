@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAFE — Evaluation Result</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, sans-serif; background: #F9F8F6; color: #1C1917; min-height: 100vh; }
+
+    /* Top bar */
+    #topbar {
+      background: #44403C; color: #fff; padding: 0 40px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .wordmark { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
+    .btn-new {
+      padding: 7px 18px; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 7px;
+      background: none; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-new:hover { background: rgba(255,255,255,0.1); }
+
+    /* Page layout */
+    #page { max-width: 900px; margin: 0 auto; padding: 40px 40px 80px; }
+
+    /* Verdict hero */
+    #verdict-hero { text-align: center; padding: 48px 0 32px; }
+    #verdict-text { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 700; }
+    #verdict-badge {
+      display: inline-block; padding: 6px 20px; border-radius: 20px; font-size: 14px; font-weight: 600;
+      margin-top: 12px;
+    }
+    #eval-id { color: #A8A29E; font-size: 12px; margin-top: 10px; }
+    #eval-ts { color: #A8A29E; font-size: 12px; }
+
+    /* Verdict color vars — set by JS */
+    .verdict-APPROVE { --v-text: #3B6D11; --v-bg: #EAF3DE; }
+    .verdict-HOLD    { --v-text: #854F0B; --v-bg: #FAEEDA; }
+    .verdict-REJECT  { --v-text: #A32D2D; --v-bg: #FCEBEB; }
+    #verdict-text { color: var(--v-text, #1C1917); }
+    #verdict-badge { background: var(--v-bg, #F5F0EB); color: var(--v-text, #1C1917); }
+
+    /* Colorblind overrides */
+    body.cb .verdict-APPROVE { --v-text: #005C00; --v-bg: #D6F0D6; }
+    body.cb .verdict-HOLD    { --v-text: #5C4400; --v-bg: #FFF3CC; }
+    body.cb .verdict-REJECT  { --v-text: #005C99; --v-bg: #D6E8FF; }
+
+    /* Rule reference */
+    #rule-block {
+      background: #F5F0EB; border-left: 4px solid #78716C; border-radius: 8px;
+      padding: 16px 20px; margin-bottom: 28px; font-size: 14px;
+    }
+    #rule-block .rule-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #78716C; margin-bottom: 6px; }
+
+    /* Expert cards grid */
+    #experts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    @media (max-width: 700px) { #experts-grid { grid-template-columns: 1fr; } }
+
+    .expert-card { border-radius: 12px; overflow: hidden; }
+    .expert-card-header { padding: 14px 16px; color: #fff; }
+    .expert-card-header .expert-tag { font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-bottom: 4px; }
+    .expert-card-header .expert-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
+    .expert-card-header .expert-role { font-size: 8.5px; opacity: 0.75; margin-top: 2px; }
+    .expert-card-body { padding: 14px 16px; }
+    .overall-pill {
+      display: inline-block; padding: 4px 12px; border-radius: 12px;
+      font-size: 12px; font-weight: 600; margin-bottom: 12px;
+    }
+    .sev-HIGH   { background: #FCEBEB; color: #A32D2D; }
+    .sev-MEDIUM { background: #FAEEDA; color: #854F0B; }
+    .sev-LOW    { background: #EAF3DE; color: #3B6D11; }
+    body.cb .sev-HIGH   { background: #D6E8FF; color: #005C99; }
+    body.cb .sev-MEDIUM { background: #FFF3CC; color: #5C4400; }
+    body.cb .sev-LOW    { background: #D6F0D6; color: #005C00; }
+
+    .dim-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dim-chip {
+      font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 600;
+    }
+    .no-dims { font-size: 12px; color: #A8A29E; }
+
+    /* Additional findings */
+    #findings-section { margin-bottom: 32px; }
+    .section-title {
+      font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #78716C; margin-bottom: 12px;
+    }
+    .finding-item {
+      background: #FAEEDA; border-left: 3px solid #D4A820; border-radius: 6px;
+      padding: 12px 16px; font-size: 13px; margin-bottom: 8px;
+    }
+
+    /* Collapsible recommendations */
+    #recs-section { margin-bottom: 32px; }
+    .collapsible-header {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; padding: 14px 16px; background: #F5F0EB; border-radius: 8px;
+      font-size: 14px; font-weight: 600; user-select: none;
+    }
+    .collapsible-header .chevron { transition: transform 0.2s; font-size: 16px; }
+    .collapsible-header.open .chevron { transform: rotate(180deg); }
+    .collapsible-body { display: none; padding: 16px; }
+    .collapsible-body.open { display: block; }
+    .rec-item { font-size: 13px; padding: 8px 0; border-bottom: 1px solid #E7E5E4; }
+    .rec-item:last-child { border-bottom: none; }
+
+    /* Download bar */
+    #download-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; border-top: 1px solid #E7E5E4;
+      padding: 14px 40px; display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+    }
+    .dl-label { font-size: 13px; color: #78716C; }
+    .dl-buttons { display: flex; gap: 10px; }
+    .btn-dl-pdf, .btn-dl-json {
+      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block;
+    }
+    .btn-dl-pdf  { background: #44403C; color: #fff; border: none; }
+    .btn-dl-json { background: #fff; color: #44403C; border: 1.5px solid #D6D3D1; }
+    .btn-dl-pdf:hover { opacity: 0.88; }
+
+    /* Translation pill */
+    .translation-pill {
+      display: inline-block; padding: 3px 10px; border-radius: 10px;
+      background: #F5F0EB; color: #78716C; font-size: 11px; font-weight: 600; margin-top: 8px;
+    }
+
+    /* Empty / error state */
+    #no-data { text-align: center; padding: 80px 20px; color: #78716C; }
+    #no-data h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div id="topbar">
+    <span class="wordmark">SAFE</span>
+    <button class="btn-new" onclick="window.location.href='/'">New Evaluation</button>
+  </div>
+
+  <div id="page">
+    <!-- Rendered by JS -->
+    <div id="no-data" style="display:none;">
+      <h2>No result found</h2>
+      <p>Please start a new evaluation from the home page.</p>
+    </div>
+  </div>
+
+  <div id="download-bar" style="display:none;">
+    <span class="dl-label" id="dl-label">Evaluation complete</span>
+    <div class="dl-buttons">
+      <a class="btn-dl-json" id="dl-json-btn" href="#" download>Download JSON</a>
+      <a class="btn-dl-pdf" id="dl-pdf-btn" href="#" target="_blank">Download PDF Report</a>
+    </div>
+  </div>
+
+  <script>
+    // Expert card palette
+    const EXPERT_STYLE = {
+      expert_adversarial_security: { headerBg: '#3D6070', bodyBg: '#F2F7FA', pillBg: '#E0EDF5', role: 'Adversarial Security' },
+      expert_content_safety:       { headerBg: '#4A4880', bodyBg: '#F3F2FA', pillBg: '#E2E1F5', role: 'Content Safety' },
+      expert_governance_un:        { headerBg: '#634078', bodyBg: '#F6F1FA', pillBg: '#EAE0F5', role: 'Governance & UN' },
+    };
+
+    const BADGE_TEXT = {
+      APPROVE: 'Cleared for UNICC deployment',
+      HOLD:    'Human review required',
+      REJECT:  'Do not deploy into UNICC systems',
+    };
+
+    function render(data) {
+      const verdict = data.verdict || 'HOLD';
+      const page = document.getElementById('page');
+
+      // Verdict hero
+      const heroDiv = document.createElement('div');
+      heroDiv.id = 'verdict-hero';
+      heroDiv.className = 'verdict-' + verdict;
+      heroDiv.innerHTML = `
+        <div id="verdict-text">${verdict}</div>
+        <div id="verdict-badge">${BADGE_TEXT[verdict] || verdict}</div>
+        <div id="eval-id">Evaluation ID: ${esc(data.evaluation_id || '—')}</div>
+        <div id="eval-ts">${esc(data.timestamp || '')}</div>
+        ${data.translation_report?.translation_applied
+          ? `<span class="translation-pill">Translation applied · ${esc(data.translation_report.primary_language || '')}</span>` : ''}
+      `;
+      page.appendChild(heroDiv);
+
+      // Rule reference
+      if (data.primary_reason) {
+        const rb = document.createElement('div');
+        rb.id = 'rule-block';
+        rb.innerHTML = `<div class="rule-label">Decision Rule</div>${esc(data.primary_reason.rule || JSON.stringify(data.primary_reason))}`;
+        page.appendChild(rb);
+      }
+
+      // Expert cards
+      if (data.experts && data.experts.length) {
+        const grid = document.createElement('div');
+        grid.id = 'experts-grid';
+        data.experts.forEach(expert => {
+          const style = EXPERT_STYLE[expert.id] || { headerBg: '#44403C', bodyBg: '#F9F8F6', pillBg: '#F5F0EB', role: expert.id };
+          const card = document.createElement('div');
+          card.className = 'expert-card';
+          const dims = (expert.triggered_dimensions || []);
+          const dimsHtml = dims.length
+            ? dims.map(d => `<span class="dim-chip sev-${d.level || 'LOW'}" style="background:${style.pillBg}">${esc(d.name || d.dimension || '')}</span>`).join('')
+            : '<span class="no-dims">No issues detected</span>';
+          card.innerHTML = `
+            <div class="expert-card-header" style="background:${style.headerBg}">
+              <div class="expert-tag">Expert</div>
+              <div class="expert-name">${esc(style.role)}</div>
+              <div class="expert-role">${esc(expert.id)}</div>
+            </div>
+            <div class="expert-card-body" style="background:${style.bodyBg}">
+              <div class="overall-pill sev-${expert.overall}">${expert.overall}</div>
+              <div class="dim-list">${dimsHtml}</div>
+            </div>`;
+          grid.appendChild(card);
+        });
+        page.appendChild(grid);
+      }
+
+      // Additional findings
+      if (data.additional_findings && data.additional_findings.length) {
+        const sec = document.createElement('div');
+        sec.id = 'findings-section';
+        sec.innerHTML = `<div class="section-title">Additional Findings</div>` +
+          data.additional_findings.map(f =>
+            `<div class="finding-item">${esc(typeof f === 'string' ? f : JSON.stringify(f))}</div>`
+          ).join('');
+        page.appendChild(sec);
+      }
+
+      // Recommendations (collapsible)
+      if (data.recommendations && data.recommendations.length) {
+        const sec = document.createElement('div');
+        sec.id = 'recs-section';
+        sec.innerHTML = `
+          <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            Recommendations (${data.recommendations.length})
+            <span class="chevron">▼</span>
+          </div>
+          <div class="collapsible-body">
+            ${data.recommendations.map(r => `<div class="rec-item">${esc(typeof r === 'string' ? r : JSON.stringify(r))}</div>`).join('')}
+          </div>`;
+        page.appendChild(sec);
+      }
+
+      // Download bar
+      const bar = document.getElementById('download-bar');
+      bar.style.display = 'flex';
+      document.getElementById('dl-label').textContent = `${verdict} · ${esc(data.evaluation_id || '')}`;
+
+      // JSON download
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      document.getElementById('dl-json-btn').href = URL.createObjectURL(blob);
+      document.getElementById('dl-json-btn').download = `${data.evaluation_id || 'result'}.json`;
+
+      // PDF download (via API endpoint)
+      if (data.evaluation_id) {
+        document.getElementById('dl-pdf-btn').href = `/report/${encodeURIComponent(data.evaluation_id)}`;
+      }
+    }
+
+    function toggleCollapsible(header) {
+      header.classList.toggle('open');
+      header.nextElementSibling.classList.toggle('open');
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Load result
+    const raw = sessionStorage.getItem('safe_result');
+    if (raw) {
+      try { render(JSON.parse(raw)); }
+      catch(e) { document.getElementById('no-data').style.display = 'block'; }
+    } else {
+      document.getElementById('no-data').style.display = 'block';
+    }
+
+    // Colorblind mode (persist via localStorage)
+    if (localStorage.getItem('safe_cb') === '1') document.body.classList.add('cb');
+  </script>
+</body>
+</html>

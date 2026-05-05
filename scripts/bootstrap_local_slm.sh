@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+MODEL_PRESET="${MODEL_PRESET:-qwen3.5-4b}"
+START_DEMO=0
+SKIP_SMOKE_TEST=0
+
+usage() {
+  cat <<'EOF'
+Usage: ./scripts/bootstrap_local_slm.sh [--preset <name>] [--start-demo] [--skip-smoke-test]
+
+Presets:
+  qwen3.5-4b          Default public Qwen preset; runner disables thinking where supported
+  qwen2.5-3b          Fallback Qwen preset if you want a slightly smaller model
+  gemma3-4b-fp16      Stronger GPU preset for higher-quality council output
+
+Examples:
+  ./scripts/bootstrap_local_slm.sh
+  ./scripts/bootstrap_local_slm.sh --preset qwen3.5-4b
+  ./scripts/bootstrap_local_slm.sh --preset qwen2.5-3b
+  ./scripts/bootstrap_local_slm.sh --preset gemma3-4b-fp16
+  MODEL_PRESET=gemma3-4b-fp16 ./scripts/bootstrap_local_slm.sh --start-demo
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --preset)
+      MODEL_PRESET="${2:-}"
+      shift 2
+      ;;
+    --start-demo)
+      START_DEMO=1
+      shift
+      ;;
+    --skip-smoke-test)
+      SKIP_SMOKE_TEST=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+case "${MODEL_PRESET}" in
+  qwen2.5-3b)
+    MODEL_ID="Qwen/Qwen2.5-3B-Instruct"
+    DEVICE="${LOCAL_HF_DEVICE:-auto}"
+    DTYPE="${LOCAL_HF_DTYPE:-auto}"
+    DEVICE_MAP="${LOCAL_HF_DEVICE_MAP:-auto}"
+    MAX_NEW_TOKENS="${LOCAL_HF_MAX_NEW_TOKENS:-288}"
+    MAX_INPUT_CHARS="${LOCAL_HF_MAX_INPUT_CHARS:-10000}"
+    ;;
+  qwen3.5-4b)
+    MODEL_ID="Qwen/Qwen3.5-4B"
+    DEVICE="${LOCAL_HF_DEVICE:-auto}"
+    DTYPE="${LOCAL_HF_DTYPE:-auto}"
+    DEVICE_MAP="${LOCAL_HF_DEVICE_MAP:-auto}"
+    MAX_NEW_TOKENS="${LOCAL_HF_MAX_NEW_TOKENS:-448}"
+    MAX_INPUT_CHARS="${LOCAL_HF_MAX_INPUT_CHARS:-10000}"
+    ;;
+  gemma3-4b-fp16)
+    MODEL_ID="google/gemma-3-4b-it"
+    DEVICE="cuda"
+    DTYPE="float16"
+    DEVICE_MAP="auto"
+    MAX_NEW_TOKENS="${LOCAL_HF_MAX_NEW_TOKENS:-288}"
+    MAX_INPUT_CHARS="${LOCAL_HF_MAX_INPUT_CHARS:-10000}"
+    ;;
+  *)
+    echo "Unsupported preset: ${MODEL_PRESET}" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
+
+cat > .runtime.local-hf.env <<EOF
+export SLM_BACKEND=local
+export LOCAL_SLM_MODE=hf
+export EXPERT_EXECUTION_MODE=slm
+export LOCAL_HF_MODEL_ID=${MODEL_ID}
+export LOCAL_HF_DEVICE=${DEVICE}
+export LOCAL_HF_DTYPE=${DTYPE}
+export LOCAL_HF_DEVICE_MAP=${DEVICE_MAP}
+export LOCAL_HF_MAX_NEW_TOKENS=${MAX_NEW_TOKENS}
+export LOCAL_HF_MAX_INPUT_CHARS=${MAX_INPUT_CHARS}
+export LOCAL_HF_TEMPERATURE=${LOCAL_HF_TEMPERATURE:-0.0}
+export LOCAL_HF_TOP_P=${LOCAL_HF_TOP_P:-1.0}
+EOF
+
+set -a
+source ./.runtime.local-hf.env
+set +a
+
+echo "Installing local HF dependencies..."
+"$PYTHON_BIN" -m pip install -e ".[local-hf]"
+
+echo "Preloading model ${LOCAL_HF_MODEL_ID} on ${LOCAL_HF_DEVICE} (${LOCAL_HF_DTYPE})..."
+"$PYTHON_BIN" scripts/preload_local_hf_model.py
+
+if [[ "${SKIP_SMOKE_TEST}" != "1" ]]; then
+  echo "Running smoke-test in local SLM mode..."
+  "$PYTHON_BIN" -c "from app.main import smoke_test; import json; print(json.dumps(smoke_test(), indent=2))"
+fi
+
+printf '\n'
+printf 'Local SLM runtime prepared.\n'
+printf 'Preset: %s\n' "${MODEL_PRESET}"
+printf 'Model:  %s\n' "${LOCAL_HF_MODEL_ID}"
+printf 'Env:    %s/.runtime.local-hf.env\n' "$(pwd)"
+printf '\n'
+printf 'To reuse this configuration in a shell:\n'
+printf '  source ./.runtime.local-hf.env\n'
+printf '\n'
+printf 'To start the API + Streamlit with this model:\n'
+printf '  source ./.runtime.local-hf.env && ./scripts/start_demo.sh\n'
+
+if [[ "${START_DEMO}" == "1" ]]; then
+  echo "Starting demo services with ${MODEL_PRESET}..."
+  exec ./scripts/start_demo.sh
+fi

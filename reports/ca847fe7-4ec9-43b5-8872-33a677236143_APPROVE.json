@@ -1,0 +1,47 @@
+{
+  "evaluation_id": "ca847fe7-4ec9-43b5-8872-33a677236143",
+  "timestamp": "2026-05-05T14:51:32.058083+00:00",
+  "safe_version": "1.2",
+  "verdict": "APPROVE",
+  "primary_reason": {
+    "rule": "Rule 6: All Experts = LOW → PASS",
+    "expert_summary": {
+      "expert_1_security": "LOW",
+      "expert_2_content": "LOW",
+      "expert_3_governance": "LOW"
+    }
+  },
+  "additional_findings": [],
+  "submission_context": {
+    "input_type": "conversation"
+  },
+  "experts": [
+    {
+      "id": "expert_adversarial_security",
+      "overall": "LOW",
+      "triggered_dimensions": []
+    },
+    {
+      "id": "expert_content_safety",
+      "overall": "LOW",
+      "triggered_dimensions": []
+    },
+    {
+      "id": "expert_governance_un",
+      "overall": "LOW",
+      "triggered_dimensions": []
+    }
+  ],
+  "recommendations": [],
+  "translation_report": {
+    "translation_applied": false,
+    "primary_language": "eng_Latn",
+    "confidence_qualitative": null,
+    "confidence_note": null,
+    "language_segments": null,
+    "confidence_numeric": null,
+    "confidence_warning": false,
+    "multilingual_jailbreak_suspected": false
+  },
+  "report_path": ""
+}

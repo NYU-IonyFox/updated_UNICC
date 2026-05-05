@@ -1,18 +1,21 @@
 import glob
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Body, FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import Body, FastAPI, Form, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from app.analyzers import summarize_repository
 from app.audit import ensure_storage_ready
 from app.council import synthesize_council
 from app.intake.submission_service import SubmissionError
 from app.orchestrator import SafetyLabOrchestrator, run_evaluation
-from app.safe_schemas import EvidenceBundle, SAFEEvaluationResponse
+from app.safe_schemas import EvidenceBundle, SAFEEvaluationResponse, TranslationReport
 from app.schemas import AgentContext, EvaluationRequest, EvaluationResponse, SubmissionTarget
 
 logger = logging.getLogger(__name__)
@@ -104,9 +107,18 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="UNICC AI Safety Lab", version="0.3.0", lifespan=lifespan)
 orchestrator = SafetyLabOrchestrator()
 
+_FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+_STATIC_DIR = _FRONTEND_DIR / "static"
+_TEMPLATES_DIR = _FRONTEND_DIR / "templates"
 
-@app.get("/")
+if _STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+_templates = Jinja2Templates(directory=str(_TEMPLATES_DIR)) if _TEMPLATES_DIR.exists() else None
+
+
 def root() -> dict[str, str]:
+    """Returns API metadata dict. Kept callable for test_api.py compatibility."""
     preflight = orchestrator.runtime_preflight()
     return {
         "name": "UNICC AI Safety Lab API",
@@ -123,6 +135,97 @@ def root() -> dict[str, str]:
         "configured_execution_mode": preflight["configured_execution_mode"],
         "startup_warning": preflight["warning"],
     }
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def index(request: Request):
+    if _templates:
+        return _templates.TemplateResponse(request, "index.html")
+    info = root()
+    return HTMLResponse(content=f"<h1>SAFE</h1><pre>{json.dumps(info, indent=2)}</pre>")
+
+
+@app.get("/result", response_class=HTMLResponse, include_in_schema=False)
+def result_page(request: Request):
+    if _templates:
+        return _templates.TemplateResponse(request, "result.html")
+    return HTMLResponse(content="<h1>SAFE — Result</h1>")
+
+
+@app.post("/submit", summary="Frontend form submission", include_in_schema=False)
+def submit_form(
+    evaluation_mode: str = Form("behavior_only"),
+    agent_name: str = Form("Unnamed Agent"),
+    description: str = Form(""),
+    domain: str = Form("Other"),
+    high_autonomy: str = Form("false"),
+    selected_policies: str = Form("[]"),
+    conversation: str = Form("[]"),
+    source_type: str = Form("github_url"),
+    github_url: str = Form(""),
+    local_path: str = Form(""),
+    repo_description: str = Form(""),
+) -> SAFEEvaluationResponse:
+    try:
+        parsed_policies = json.loads(selected_policies)
+    except Exception:
+        parsed_policies = ["eu_ai_act", "us_nist", "iso", "unesco"]
+    try:
+        parsed_conv = json.loads(conversation)
+    except Exception:
+        parsed_conv = []
+
+    submission = None
+    if evaluation_mode in ("repository_only", "hybrid") and (github_url or local_path):
+        submission = SubmissionTarget(
+            source_type=source_type,
+            github_url=github_url or None,
+            local_path=local_path or None,
+            target_name=agent_name,
+            description=repo_description or description,
+        )
+
+    request_obj = EvaluationRequest(
+        evaluation_mode=evaluation_mode,
+        context=AgentContext(
+            agent_name=agent_name,
+            description=description,
+            domain=domain,
+            capabilities=[],
+            high_autonomy=high_autonomy.lower() == "true",
+        ),
+        selected_policies=parsed_policies,
+        conversation=parsed_conv,
+        metadata={},
+        submission=submission,
+    )
+    _mode_to_input_type = {
+        "behavior_only": "conversation",
+        "repository_only": "github",
+        "hybrid": "github",
+    }
+    bundle_input_type = _mode_to_input_type.get(evaluation_mode, "conversation")
+
+    try:
+        eval_response = orchestrator.evaluate(request_obj)
+        bundle = EvidenceBundle(
+            input_type=bundle_input_type,
+            translation_report=TranslationReport(
+                translation_applied=False,
+                primary_language="eng_Latn",
+            ),
+        )
+        safe_response = run_evaluation(bundle)
+        safe_response = safe_response.model_copy(update={
+            "submission_context": {
+                "input_type": evaluation_mode,
+                "target_name": agent_name,
+                "evaluation_id": eval_response.evaluation_id if hasattr(eval_response, "evaluation_id") else "",
+            }
+        })
+        return safe_response
+    except SubmissionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/health", summary="Health check", description="Simple liveness probe for the API process.")

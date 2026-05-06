@@ -18,3 +18,4 @@ reports/
 model_cache/
 *.safetensors
 *.bin
+.claude/ 

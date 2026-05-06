@@ -46,6 +46,14 @@ class BaseExpert(ABC):
             "triggered_dimensions": [],
         }
 
+    def _build_user_content(self, evidence_bundle: dict) -> str:
+        """Serialize bundle for LLM user message, stripping any api_key fields."""
+        sanitized = dict(evidence_bundle)
+        if isinstance(sanitized.get("content"), dict):
+            sanitized["content"] = {k: v for k, v in sanitized["content"].items() if k != "api_key"}
+        sanitized.pop("api_key", None)
+        return json.dumps(sanitized, ensure_ascii=False)
+
     def _parse_llm_raw(self, raw: str) -> list:
         """Robustly extract a JSON array from raw LLM output."""
         raw = raw.strip()

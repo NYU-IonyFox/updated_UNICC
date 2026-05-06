@@ -117,7 +117,6 @@ def evaluate(request: EvaluationRequest = Body(...)) -> SAFEEvaluationResponse:
 
     # Build EvidenceBundle for L3–L5
     content: dict = {
-        "api_key": api_key,
         "target_name": request.context.agent_name,
         "conversation": [t.model_dump() for t in request.conversation],
         "evaluation_mode": request.evaluation_mode,

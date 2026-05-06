@@ -135,9 +135,10 @@ body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:
 /* REGULATORY */
 .reg-list{display:flex;flex-direction:column;gap:6px;}
 .reg-item{display:flex;gap:10px;padding:8px 12px;border-radius:7px;border:0.5px solid #E7E5E4;background:#fff;align-items:flex-start;}
-.reg-sev{font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:1px;}
+.reg-sev{font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;min-width:60px;text-align:center;margin-top:1px;}
 .reg-sev.hi{background:#FCEBEB;color:#A32D2D;}
 .reg-sev.md{background:#FAEEDA;color:#854F0B;}
+.reg-content{flex:1;min-width:0;}
 .reg-fw{font-size:10px;font-weight:600;color:#1C1917;margin-bottom:2px;}
 .reg-prov{font-size:9.5px;color:#78716C;line-height:1.5;}
 .reg-src{font-size:8px;color:#A8A29E;margin-top:2px;}
@@ -342,7 +343,7 @@ function buildRegViolations(data){
     var sc=tierCls(item.sev);
     return '<div class="reg-item">'
       +'<div class="reg-sev '+sc+'">'+h(tierLabel(item.sev))+'</div>'
-      +'<div>'
+      +'<div class="reg-content">'
         +'<div class="reg-fw">'+h(item.fw)+'</div>'
         +'<div class="reg-prov">'+h(item.prov)+'</div>'
         +'<div class="reg-src">'+h(item.src)+'</div>'

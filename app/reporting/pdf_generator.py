@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from reportlab.lib.colors import HexColor, white, black
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import (
     PageBreak,
@@ -17,24 +17,68 @@ from reportlab.platypus import (
 from app.safe_schemas import SAFEEvaluationResponse
 
 # ---------------------------------------------------------------------------
-# Verdict color palette
+# Color palette
 # ---------------------------------------------------------------------------
-_COLORS: dict[str, dict] = {
-    "REJECT":  {"text": HexColor("#A32D2D"), "accent": HexColor("#FCEBEB")},
-    "HOLD":    {"text": HexColor("#854F0B"), "accent": HexColor("#FAEEDA")},
-    "APPROVE": {"text": HexColor("#3B6D11"), "accent": HexColor("#EAF3DE")},
-}
 _DARK_BG = HexColor("#44403C")
+_RULE_REF_BG = HexColor("#F5F0EB")
 
-_EXPERT_DISPLAY = {
+# Cover page (dark background) verdict colors — pastels readable on dark
+_COVER_VERDICT_COLORS: dict[str, str] = {
+    "REJECT":  "#F2A8A8",
+    "HOLD":    "#FDE68A",
+    "APPROVE": "#BBF7D0",
+}
+_COVER_VERDICT_BORDER: dict[str, str] = {
+    "REJECT":  "#E88080",
+    "HOLD":    "#D4A820",
+    "APPROVE": "#4A9B6F",
+}
+
+# Inner page (light background) verdict colors
+_INNER_VERDICT_TEXT: dict[str, str] = {
+    "REJECT":  "#A32D2D",
+    "HOLD":    "#854F0B",
+    "APPROVE": "#3B6D11",
+}
+_INNER_VERDICT_BG: dict[str, str] = {
+    "REJECT":  "#FCEBEB",
+    "HOLD":    "#FAEEDA",
+    "APPROVE": "#EAF3DE",
+}
+
+# Expert header colors
+_EXPERT_COLORS: dict[str, str] = {
+    "expert_adversarial_security": "#3D6070",
+    "expert_content_safety":       "#4A4880",
+    "expert_governance_un":        "#634078",
+}
+_EXPERT_DISPLAY: dict[str, str] = {
     "expert_adversarial_security": "Expert 1 — Adversarial Security",
     "expert_content_safety":       "Expert 2 — Content Safety",
     "expert_governance_un":        "Expert 3 — Governance & UN",
 }
 
+# Severity colors (light theme for dimension tags)
+_SEV_BG: dict[str, str] = {
+    "HIGH":   "#FCEBEB",
+    "MEDIUM": "#FAEEDA",
+    "LOW":    "#EAF3DE",
+}
+_SEV_TEXT: dict[str, str] = {
+    "HIGH":   "#A32D2D",
+    "MEDIUM": "#854F0B",
+    "LOW":    "#3B6D11",
+}
+
+# Verdict badge text
+_VERDICT_BADGE: dict[str, str] = {
+    "REJECT":  "Do not deploy into UNICC systems",
+    "HOLD":    "Human review required",
+    "APPROVE": "Cleared for UNICC deployment",
+}
+
 
 def _esc(text: str) -> str:
-    """Escape XML special chars for ReportLab Paragraph."""
     return (
         str(text)
         .replace("&", "&amp;")
@@ -43,167 +87,286 @@ def _esc(text: str) -> str:
     )
 
 
-def _styles(verdict: str) -> dict[str, ParagraphStyle]:
-    c = _COLORS.get(verdict, _COLORS["HOLD"])
-    base = getSampleStyleSheet()
-
-    def _ps(name: str, **kw) -> ParagraphStyle:
-        return ParagraphStyle(name, **kw)
-
-    return {
-        "title": _ps(
-            "Title",
-            fontName="Helvetica-Bold",
-            fontSize=24,
-            textColor=white,
-            alignment=TA_CENTER,
-            spaceAfter=10,
-        ),
-        "verdict_large": _ps(
-            "VerdictLarge",
-            fontName="Helvetica-Bold",
-            fontSize=48,
-            textColor=c["text"],
-            alignment=TA_CENTER,
-            spaceAfter=14,
-        ),
-        "h1": _ps(
-            "H1",
-            fontName="Helvetica-Bold",
-            fontSize=16,
-            textColor=c["text"],
-            spaceBefore=14,
-            spaceAfter=6,
-        ),
-        "h2": _ps(
-            "H2",
-            fontName="Helvetica-Bold",
-            fontSize=12,
-            textColor=black,
-            spaceBefore=10,
-            spaceAfter=4,
-        ),
-        "body": _ps(
-            "Body",
-            fontName="Helvetica",
-            fontSize=9,
-            textColor=black,
-            leading=14,
-            spaceAfter=4,
-        ),
-        "small": _ps(
-            "Small",
-            fontName="Helvetica",
-            fontSize=8,
-            textColor=HexColor("#555555"),
-            leading=12,
-            spaceAfter=2,
-        ),
-        "cover_meta": _ps(
-            "CoverMeta",
-            fontName="Helvetica",
-            fontSize=10,
-            textColor=white,
-            alignment=TA_CENTER,
-            spaceAfter=6,
-        ),
-    }
+def _ps(name: str, **kw) -> ParagraphStyle:
+    return ParagraphStyle(name, **kw)
 
 
-def _cover_page(response: SAFEEvaluationResponse, sty: dict, verdict_colors: dict) -> list:
+# ---------------------------------------------------------------------------
+# Cover page (dark background)
+# ---------------------------------------------------------------------------
+def _cover_page(response: SAFEEvaluationResponse) -> list:
+    verdict = response.verdict
+    vcolor = HexColor(_COVER_VERDICT_COLORS.get(verdict, "#FDE68A"))
+    badge_text = _VERDICT_BADGE.get(verdict, "")
     target = response.submission_context.get("target_name", "Unknown Target")
     rule_text = response.primary_reason.get("rule", "—")
 
-    elements = []
-    elements.append(Spacer(1, 3 * cm))
-    elements.append(Paragraph("SAFE Evaluation Report", sty["title"]))
-    elements.append(Spacer(1, 0.4 * cm))
-    elements.append(Paragraph(_esc(f"Target: {target}"), sty["cover_meta"]))
-    elements.append(Spacer(1, 1.0 * cm))
-    elements.append(Paragraph(_esc(response.verdict), sty["verdict_large"]))
+    sty_title = _ps("CoverTitle", fontName="Helvetica-Bold", fontSize=11,
+                    textColor=HexColor("#FAFAF8"), alignment=TA_CENTER, spaceAfter=2)
+    sty_label = _ps("CoverLabel", fontName="Helvetica", fontSize=8,
+                    textColor=HexColor("#A8A29E"), alignment=TA_CENTER, spaceAfter=4)
+    sty_target = _ps("CoverTarget", fontName="Helvetica-Bold", fontSize=16,
+                     textColor=HexColor("#FAFAF8"), alignment=TA_CENTER, spaceAfter=6)
+    sty_verdict = _ps("CoverVerdict", fontName="Helvetica-Bold", fontSize=72,
+                      textColor=vcolor, alignment=TA_CENTER, spaceAfter=8, leading=80)
+    sty_badge = _ps("CoverBadge", fontName="Helvetica", fontSize=10,
+                    textColor=vcolor, alignment=TA_CENTER, spaceAfter=10)
+    sty_rule = _ps("CoverRule", fontName="Helvetica", fontSize=9,
+                   textColor=HexColor("#D6D3D1"), alignment=TA_LEFT, spaceAfter=4, leading=14)
+    sty_meta = _ps("CoverMeta", fontName="Helvetica", fontSize=8,
+                   textColor=HexColor("#78716C"), alignment=TA_CENTER, spaceAfter=3)
+
+    elements: list = []
+    elements.append(Spacer(1, 2.5 * cm))
+    elements.append(Paragraph("SAFE", sty_title))
+    elements.append(Paragraph("Safety Assurance Framework for Evaluation", sty_label))
     elements.append(Spacer(1, 0.6 * cm))
-    elements.append(Paragraph(_esc(f"Rule applied: {rule_text}"), sty["cover_meta"]))
-    elements.append(Spacer(1, 1.5 * cm))
-    elements.append(Paragraph(_esc(f"Evaluation ID: {response.evaluation_id}"), sty["cover_meta"]))
-    elements.append(Paragraph(_esc(f"Timestamp: {response.timestamp}"), sty["cover_meta"]))
-    elements.append(Paragraph(_esc(f"SAFE version: {response.safe_version}"), sty["cover_meta"]))
+    elements.append(Paragraph(_esc(f"Target: {target}"), sty_label))
+    elements.append(Spacer(1, 0.8 * cm))
+    elements.append(Paragraph(_esc(verdict), sty_verdict))
+    elements.append(Paragraph(_esc(badge_text), sty_badge))
+    elements.append(Spacer(1, 0.6 * cm))
+
+    # Rule reference block
+    rule_table = Table(
+        [[Paragraph(_esc(f"Decision rule: {rule_text}"), sty_rule)]],
+        colWidths=[14 * cm],
+    )
+    rule_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), HexColor("#0D0C0B")),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("LINEBEFORE", (0, 0), (0, -1), 2, HexColor(_COVER_VERDICT_BORDER.get(verdict, "#D4A820"))),
+        ("ROWBACKGROUNDS", (0, 0), (-1, -1), [HexColor("#141210")]),
+    ]))
+    elements.append(rule_table)
+    elements.append(Spacer(1, 2.0 * cm))
+
+    elements.append(Paragraph(_esc(f"Evaluation ID: {response.evaluation_id}"), sty_meta))
+    elements.append(Paragraph(_esc(f"Timestamp: {response.timestamp}"), sty_meta))
+    elements.append(Paragraph(_esc(f"SAFE version: {response.safe_version}"), sty_meta))
     elements.append(PageBreak())
     return elements
 
 
-def _exec_summary_page(response: SAFEEvaluationResponse, sty: dict) -> list:
-    elements = []
-    elements.append(Paragraph("Executive Summary", sty["h1"]))
-    elements.append(Paragraph(
-        _esc(f"Verdict: {response.verdict}"),
-        sty["h2"],
-    ))
-    rule = response.primary_reason.get("rule", "—")
-    elements.append(Paragraph(_esc(f"Decision rule: {rule}"), sty["body"]))
+# ---------------------------------------------------------------------------
+# Page 2 — Executive Summary
+# ---------------------------------------------------------------------------
+def _exec_summary_page(response: SAFEEvaluationResponse) -> list:
+    verdict = response.verdict
+    vtext = HexColor(_INNER_VERDICT_TEXT.get(verdict, "#854F0B"))
+    vbg = HexColor(_INNER_VERDICT_BG.get(verdict, "#FAEEDA"))
+    badge_text = _VERDICT_BADGE.get(verdict, "")
+    rule_text = response.primary_reason.get("rule", "—")
 
+    sty_h1 = _ps("H1", fontName="Helvetica-Bold", fontSize=14,
+                 textColor=_DARK_BG, spaceBefore=10, spaceAfter=8)
+    sty_verdict_lg = _ps("VerdictLg", fontName="Helvetica-Bold", fontSize=48,
+                         textColor=vtext, alignment=TA_LEFT, spaceAfter=4, leading=54)
+    sty_badge = _ps("Badge", fontName="Helvetica", fontSize=10,
+                    textColor=vtext, spaceAfter=6)
+    sty_rule = _ps("Rule", fontName="Helvetica", fontSize=9,
+                   textColor=HexColor("#57534E"), spaceAfter=4, leading=14)
+    sty_h2 = _ps("H2", fontName="Helvetica-Bold", fontSize=11,
+                 textColor=_DARK_BG, spaceBefore=12, spaceAfter=6)
+    sty_body = _ps("Body", fontName="Helvetica", fontSize=9,
+                   textColor=black, leading=14, spaceAfter=4)
+    sty_rec = _ps("Rec", fontName="Helvetica", fontSize=9,
+                  textColor=HexColor("#1C1917"), leading=14, spaceAfter=3)
+    sty_rec_num = _ps("RecNum", fontName="Helvetica-Bold", fontSize=9,
+                      textColor=_DARK_BG, spaceAfter=3)
+
+    elements: list = []
+    elements.append(Paragraph("Executive Summary", sty_h1))
+
+    # Verdict block
+    verdict_block = Table(
+        [[Paragraph(_esc(verdict), sty_verdict_lg)]],
+        colWidths=[16 * cm],
+    )
+    verdict_block.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), vbg),
+        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("BOX", (0, 0), (-1, -1), 0.5, vtext),
+    ]))
+    elements.append(verdict_block)
+    elements.append(Paragraph(_esc(badge_text), sty_badge))
+
+    # Rule reference
+    rule_block = Table(
+        [[Paragraph(_esc(f"Decision rule triggered: {rule_text}"), sty_rule)]],
+        colWidths=[16 * cm],
+    )
+    rule_block.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), _RULE_REF_BG),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+        ("LINEBEFORE", (0, 0), (0, -1), 2, _DARK_BG),
+    ]))
+    elements.append(rule_block)
+    elements.append(Spacer(1, 0.4 * cm))
+
+    # Expert risk summary table
     expert_summary = response.primary_reason.get("expert_summary", {})
     if expert_summary:
-        elements.append(Spacer(1, 0.3 * cm))
-        elements.append(Paragraph("Expert risk levels:", sty["h2"]))
+        elements.append(Paragraph("Expert Risk Summary", sty_h2))
+        rows = [["Expert", "Overall Risk"]]
         for slot, level in expert_summary.items():
-            elements.append(Paragraph(_esc(f"  • {slot}: {level}"), sty["body"]))
+            label = _EXPERT_DISPLAY.get(slot, slot)
+            rows.append([_esc(label), _esc(level)])
+        t = Table(rows, colWidths=[11 * cm, 5 * cm])
+        t.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), _RULE_REF_BG),
+            ("TEXTCOLOR",  (0, 0), (-1, 0), _DARK_BG),
+            ("FONTNAME",   (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE",   (0, 0), (-1, -1), 9),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [white, HexColor("#FAFAF9")]),
+            ("GRID",       (0, 0), (-1, -1), 0.3, HexColor("#E7E5E4")),
+            ("LEFTPADDING",  (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+            ("TOPPADDING",   (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING",(0, 0), (-1, -1), 5),
+        ]))
+        elements.append(t)
+        elements.append(Spacer(1, 0.4 * cm))
 
+    # Additional findings
     if response.additional_findings:
-        elements.append(Spacer(1, 0.4 * cm))
-        elements.append(Paragraph("Additional Findings", sty["h2"]))
+        elements.append(Paragraph("Additional Findings", sty_h2))
         for finding in response.additional_findings:
-            elements.append(Paragraph(_esc(f"• {finding}"), sty["body"]))
+            elements.append(Paragraph(_esc(f"• {finding}"), sty_body))
 
+    # Recommendations
+    elements.append(Paragraph("Recommendations", sty_h2))
     if response.recommendations:
-        elements.append(Spacer(1, 0.4 * cm))
-        elements.append(Paragraph("Recommendations", sty["h2"]))
-        for rec in response.recommendations:
+        for i, rec in enumerate(response.recommendations, 1):
             text = rec.get("text", "")
             src = rec.get("source_expert", "")
             dim = rec.get("source_dimension", "")
-            elements.append(Paragraph(
-                _esc(f"• {text} [{src} / {dim}]"),
-                sty["body"],
-            ))
+            rec_row = Table(
+                [[Paragraph(f"{i}.", sty_rec_num),
+                  Paragraph(_esc(f"{text}") + (f" [{_esc(src)} / {_esc(dim)}]" if src else ""), sty_rec)]],
+                colWidths=[0.7 * cm, 15.3 * cm],
+            )
+            rec_row.setStyle(TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ]))
+            elements.append(rec_row)
     else:
-        elements.append(Spacer(1, 0.4 * cm))
-        elements.append(Paragraph("No specific remediation recommendations generated.", sty["body"]))
+        elements.append(Paragraph("No specific remediation recommendations generated.", sty_body))
 
     elements.append(PageBreak())
     return elements
 
 
-def _expert_findings_page(response: SAFEEvaluationResponse, sty: dict) -> list:
-    elements = []
-    elements.append(Paragraph("Expert Council Findings", sty["h1"]))
+# ---------------------------------------------------------------------------
+# Page 3 — Expert Council Findings
+# ---------------------------------------------------------------------------
+def _expert_findings_page(response: SAFEEvaluationResponse) -> list:
+    sty_h1 = _ps("H1F", fontName="Helvetica-Bold", fontSize=14,
+                 textColor=_DARK_BG, spaceBefore=4, spaceAfter=10)
+    sty_h2 = _ps("H2F", fontName="Helvetica-Bold", fontSize=10,
+                 textColor=white, spaceAfter=2)
+    sty_overall = _ps("Overall", fontName="Helvetica-Bold", fontSize=9,
+                      textColor=white, spaceAfter=0)
+    sty_small = _ps("SmallF", fontName="Helvetica", fontSize=8,
+                    textColor=HexColor("#57534E"), leading=12, spaceAfter=2)
+    sty_none = _ps("NoneF", fontName="Helvetica", fontSize=9,
+                   textColor=HexColor("#A8A29E"), spaceAfter=4)
+
+    elements: list = []
+    elements.append(Paragraph("Expert Council Findings", sty_h1))
 
     for expert in response.experts:
+        expert_color = HexColor(_EXPERT_COLORS.get(expert.id, "#44403C"))
         label = _EXPERT_DISPLAY.get(expert.id, expert.id)
-        elements.append(Spacer(1, 0.3 * cm))
-        elements.append(Paragraph(_esc(f"{label}  —  Overall: {expert.overall}"), sty["h2"]))
+
+        # Expert header bar
+        header = Table(
+            [[Paragraph(_esc(label), sty_h2),
+              Paragraph(_esc(f"Overall: {expert.overall}"), sty_overall)]],
+            colWidths=[12 * cm, 4 * cm],
+        )
+        header.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), expert_color),
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (-1, -1), 7),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ]))
+        elements.append(header)
 
         if not expert.triggered_dimensions:
-            elements.append(Paragraph("No dimensions triggered (all LOW).", sty["small"]))
+            elements.append(Paragraph("No dimensions triggered (all LOW).", sty_none))
+            elements.append(Spacer(1, 0.3 * cm))
             continue
 
+        # Dimension table
+        rows = [["Tier", "Dimension", "Level", "Evidence", "Anchor"]]
         for dim in expert.triggered_dimensions:
-            elements.append(Paragraph(
-                _esc(
-                    f"  [{dim.tier}] {dim.display_name}  |  {dim.level}  |  "
-                    f"Evidence: {dim.evidence_quality}  |  Anchor: {dim.regulatory_anchor}"
-                ),
-                sty["small"],
-            ))
+            rows.append([
+                _esc(dim.tier),
+                _esc(dim.display_name),
+                _esc(dim.level),
+                _esc(dim.evidence_quality),
+                _esc(dim.regulatory_anchor[:40] + "…" if len(dim.regulatory_anchor) > 40 else dim.regulatory_anchor),
+            ])
+
+        col_w = [1.8 * cm, 4.5 * cm, 1.4 * cm, 1.8 * cm, 6.5 * cm]
+        t = Table(rows, colWidths=col_w, repeatRows=1)
+        t.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), _RULE_REF_BG),
+            ("TEXTCOLOR",  (0, 0), (-1, 0), _DARK_BG),
+            ("FONTNAME",   (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE",   (0, 0), (-1, -1), 7),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [white, HexColor("#FAFAF9")]),
+            ("GRID",       (0, 0), (-1, -1), 0.3, HexColor("#E7E5E4")),
+            ("VALIGN",     (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING",  (0, 0), (-1, -1), 5),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+            ("TOPPADDING",   (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING",(0, 0), (-1, -1), 4),
+        ]))
+        elements.append(t)
+
+        # Reason notes
+        for dim in expert.triggered_dimensions:
             if dim.reason:
-                elements.append(Paragraph(_esc(f"    Reason: {dim.reason}"), sty["small"]))
+                elements.append(Paragraph(
+                    _esc(f"  ↳ {dim.display_name}: {dim.reason}"),
+                    sty_small,
+                ))
+
+        elements.append(Spacer(1, 0.4 * cm))
 
     elements.append(PageBreak())
     return elements
 
 
-def _regulatory_page(response: SAFEEvaluationResponse, sty: dict) -> list:
-    elements = []
-    elements.append(Paragraph("Regulatory Violations Summary", sty["h1"]))
+# ---------------------------------------------------------------------------
+# Page 4 — Regulatory Violations Summary
+# ---------------------------------------------------------------------------
+def _regulatory_page(response: SAFEEvaluationResponse) -> list:
+    sty_h1 = _ps("H1R", fontName="Helvetica-Bold", fontSize=14,
+                 textColor=_DARK_BG, spaceBefore=4, spaceAfter=10)
+    sty_body = _ps("BodyR", fontName="Helvetica", fontSize=9,
+                   textColor=HexColor("#A8A29E"), spaceAfter=4)
+
+    elements: list = []
+    elements.append(Paragraph("Regulatory Violations Summary", sty_h1))
 
     rows = [["Expert", "Dimension", "Level", "Regulatory Anchor", "Evidence"]]
     for expert in response.experts:
@@ -218,31 +381,33 @@ def _regulatory_page(response: SAFEEvaluationResponse, sty: dict) -> list:
             ])
 
     if len(rows) == 1:
-        elements.append(Paragraph("No regulatory violations detected.", sty["body"]))
+        elements.append(Paragraph("No regulatory violations detected.", sty_body))
     else:
-        col_widths = [3.5 * cm, 4.0 * cm, 1.5 * cm, 5.5 * cm, 2.0 * cm]
+        col_widths = [3.5 * cm, 4.0 * cm, 1.5 * cm, 5.5 * cm, 1.5 * cm]
         t = Table(rows, colWidths=col_widths, repeatRows=1)
         t.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), HexColor("#44403C")),
-            ("TEXTCOLOR",  (0, 0), (-1, 0), white),
+            ("BACKGROUND", (0, 0), (-1, 0), _RULE_REF_BG),
+            ("TEXTCOLOR",  (0, 0), (-1, 0), _DARK_BG),
             ("FONTNAME",   (0, 0), (-1, 0), "Helvetica-Bold"),
             ("FONTSIZE",   (0, 0), (-1, -1), 7),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [white, HexColor("#F5F5F5")]),
-            ("GRID",       (0, 0), (-1, -1), 0.3, HexColor("#CCCCCC")),
+            ("GRID",       (0, 0), (-1, -1), 0.3, HexColor("#E7E5E4")),
             ("VALIGN",     (0, 0), (-1, -1), "TOP"),
             ("WORDWRAP",   (0, 0), (-1, -1), "WORD"),
-            ("LEFTPADDING",  (0, 0), (-1, -1), 4),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
-            ("TOPPADDING",   (0, 0), (-1, -1), 3),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 3),
+            ("LEFTPADDING",  (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING",   (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING",(0, 0), (-1, -1), 5),
         ]))
         elements.append(t)
 
     return elements
 
 
+# ---------------------------------------------------------------------------
+# Background callback — dark cover on page 1 only
+# ---------------------------------------------------------------------------
 def _cover_background(canvas, doc, verdict: str) -> None:
-    """Draw dark background only on page 1 (cover)."""
     if doc.page == 1:
         canvas.saveState()
         canvas.setFillColor(_DARK_BG)
@@ -250,13 +415,13 @@ def _cover_background(canvas, doc, verdict: str) -> None:
         canvas.restoreState()
 
 
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 def generate_pdf_bytes(response: SAFEEvaluationResponse) -> bytes:
-    """Generate a 4-page PDF report and return it as raw bytes (no file I/O)."""
+    """Generate a 4-page PDF report and return raw bytes (no file I/O)."""
     from io import BytesIO
     verdict = response.verdict
-    sty = _styles(verdict)
-    vc = _COLORS.get(verdict, _COLORS["HOLD"])
-
     buf = BytesIO()
     doc = SimpleDocTemplate(
         buf,
@@ -267,10 +432,10 @@ def generate_pdf_bytes(response: SAFEEvaluationResponse) -> bytes:
         bottomMargin=2 * cm,
     )
     story: list = []
-    story.extend(_cover_page(response, sty, vc))
-    story.extend(_exec_summary_page(response, sty))
-    story.extend(_expert_findings_page(response, sty))
-    story.extend(_regulatory_page(response, sty))
+    story.extend(_cover_page(response))
+    story.extend(_exec_summary_page(response))
+    story.extend(_expert_findings_page(response))
+    story.extend(_regulatory_page(response))
 
     def _on_page(canvas, doc_):
         _cover_background(canvas, doc_, verdict)
@@ -282,9 +447,6 @@ def generate_pdf_bytes(response: SAFEEvaluationResponse) -> bytes:
 def generate_pdf(response: SAFEEvaluationResponse, path: str) -> str:
     """Generate a 4-page PDF report and write it to *path*. Returns the path."""
     verdict = response.verdict
-    sty = _styles(verdict)
-    vc = _COLORS.get(verdict, _COLORS["HOLD"])
-
     doc = SimpleDocTemplate(
         path,
         pagesize=A4,
@@ -293,12 +455,11 @@ def generate_pdf(response: SAFEEvaluationResponse, path: str) -> str:
         topMargin=2 * cm,
         bottomMargin=2 * cm,
     )
-
     story: list = []
-    story.extend(_cover_page(response, sty, vc))
-    story.extend(_exec_summary_page(response, sty))
-    story.extend(_expert_findings_page(response, sty))
-    story.extend(_regulatory_page(response, sty))
+    story.extend(_cover_page(response))
+    story.extend(_exec_summary_page(response))
+    story.extend(_expert_findings_page(response))
+    story.extend(_regulatory_page(response))
 
     def _on_page(canvas, doc_):
         _cover_background(canvas, doc_, verdict)

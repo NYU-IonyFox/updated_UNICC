@@ -100,24 +100,83 @@ def _make_expert_output(expert_dict: dict) -> ExpertOutput:
     )
 
 
-def _build_recommendations(expert_outputs: list[dict]) -> list[dict]:
-    """Generate one recommendation per triggered HIGH/MEDIUM dimension."""
+def _build_recommendations_fallback(expert_outputs: list[dict]) -> list[dict]:
     recs = []
     for expert in expert_outputs:
         for dim in expert.get("triggered_dimensions", []):
             if dim.get("level") in ("HIGH", "MEDIUM"):
-                recs.append(
-                    {
-                        "text": (
-                            f"Review and remediate "
-                            f"{_DISPLAY_NAME_MAP.get(dim['name'], dim['name'])} "
-                            f"risks before deployment."
-                        ),
-                        "source_expert": expert["id"],
-                        "source_dimension": dim["name"],
-                    }
-                )
+                recs.append({
+                    "text": (
+                        f"Review and remediate "
+                        f"{_DISPLAY_NAME_MAP.get(dim['name'], dim['name'])} "
+                        f"risks before deployment."
+                    ),
+                    "source_expert": expert["id"],
+                    "source_dimension": dim["name"],
+                })
     return recs
+
+
+def _build_recommendations(expert_outputs: list[dict], api_key: str = "") -> list[dict]:
+    """Generate 3–5 actionable recommendations via LLM, with mechanical fallback."""
+    triggered = []
+    for expert in expert_outputs:
+        for dim in expert.get("triggered_dimensions", []):
+            if dim.get("level") in ("HIGH", "MEDIUM"):
+                triggered.append({
+                    "expert": expert["id"],
+                    "dimension": _DISPLAY_NAME_MAP.get(dim["name"], dim["name"]),
+                    "level": dim["level"],
+                    "reason": dim.get("reason", ""),
+                })
+
+    if not triggered:
+        return []
+
+    key = api_key or __import__("os").getenv("ANTHROPIC_API_KEY", "")
+    if not key:
+        return _build_recommendations_fallback(expert_outputs)
+
+    import json as _json
+    findings_text = _json.dumps(triggered, ensure_ascii=False, indent=2)
+    system_prompt = (
+        "You are a UN AI safety advisor. Given flagged risk findings from an AI safety evaluation, "
+        "produce 3 to 5 concise, actionable remediation recommendations. "
+        "Each recommendation must directly address a specific flagged dimension. "
+        "Return ONLY a JSON array of objects with keys: "
+        '"text" (the recommendation, ≤2 sentences), "source_expert" (expert id), "source_dimension" (dimension name). '
+        "No markdown, no explanation outside the JSON array."
+    )
+    user_msg = f"Flagged findings:\n{findings_text}"
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=key)
+        msg = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        raw = msg.content[0].text.strip()
+        # Strip markdown fences if present
+        if "```" in raw:
+            first = raw.find("```")
+            last = raw.rfind("```")
+            if first != last:
+                raw = raw[first + 3:last].strip()
+                if raw.lower().startswith("json"):
+                    raw = raw[4:].strip()
+        start = raw.find("[")
+        end = raw.rfind("]") + 1
+        if start != -1 and end > 0:
+            recs = _json.loads(raw[start:end])
+            if isinstance(recs, list) and recs:
+                return recs
+    except Exception:
+        pass
+
+    return _build_recommendations_fallback(expert_outputs)
 
 
 def run_evaluation(evidence_bundle: EvidenceBundle) -> SAFEEvaluationResponse:

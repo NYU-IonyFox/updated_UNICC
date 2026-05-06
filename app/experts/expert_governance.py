@@ -57,7 +57,7 @@ class GovernanceExpert(BaseExpert):
             or evidence_bundle.get("api_key", "")
             or evidence_bundle.get("content", {}).get("api_key", "")
         )
-        user_content = json.dumps(evidence_bundle, ensure_ascii=False)
+        user_content = self._build_user_content(evidence_bundle)
         try:
             import anthropic
         except ImportError as exc:

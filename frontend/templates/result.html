@@ -1,710 +1,634 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SAFE — Evaluation Result</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Inter, sans-serif; background: #F9F8F6; color: #1C1917; min-height: 100vh; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SAFE — Evaluation Result</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 2rem 120px;}
 
-    /* ── Topbar ─────────────────────────────────────── */
-    #topbar {
-      background: var(--color-warm-slate); color: #fff; padding: 0 36px; height: 50px;
-      display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;
-    }
-    .wordmark { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
-    .btn-new {
-      padding: 6px 16px; border: 1.5px solid rgba(255,255,255,0.45); border-radius: 7px;
-      background: none; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s;
-    }
-    .btn-new:hover { background: rgba(255,255,255,0.1); }
+.page{display:flex;min-height:700px;border:0.5px solid #C8C0B8;border-radius:14px;overflow:hidden;font-family:'Inter',sans-serif;width:100%;max-width:960px;}
 
-    /* ── Page ───────────────────────────────────────── */
-    #page { max-width: 900px; margin: 0 auto; padding: 36px 36px 100px; }
+/* SIDEBAR */
+.left{width:200px;flex-shrink:0;background:#44403C;padding:1.4rem 1.1rem;display:flex;flex-direction:column;}
+.logo{font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:700;color:#FAFAF8;margin-bottom:0.2rem;}
+.logo-sub{font-size:7.5px;color:#78716C;line-height:1.65;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1.5rem;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;margin-bottom:2px;cursor:pointer;}
+.nav-item.active{background:#57534E;}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:#78716C;flex-shrink:0;}
+.nav-dot.active{background:#D6D3D1;}
+.nav-text{font-size:10px;color:#78716C;}
+.nav-text.active{color:#E7E5E4;font-weight:500;}
+.left-spacer{flex:1;}
+.back-btn{width:100%;background:#57534E;border:none;border-radius:7px;padding:8px;font-size:10px;color:#D6D3D1;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:0.75rem;transition:background 0.15s;}
+.back-btn:hover{background:#78716C;}
+.left-meta{font-size:7.5px;color:#57534E;line-height:1.7;border-top:0.5px solid #57534E;padding-top:0.75rem;}
 
-    /* ── Verdict hero ───────────────────────────────── */
-    #verdict-hero { text-align: center; padding: 44px 0 28px; }
-    #verdict-text { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 700; }
-    #verdict-badge {
-      display: inline-block; padding: 5px 18px; border-radius: 20px;
-      font-size: 13px; font-weight: 600; margin-top: 10px;
-    }
-    #meta-row { color: #A8A29E; font-size: 11px; margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    #meta-row span { display: flex; align-items: center; gap: 4px; }
-    #meta-row .meta-dot { color: #D6D3D1; }
+/* RIGHT */
+.right{flex:1;background:#FAFAF8;overflow-y:auto;display:flex;flex-direction:column;min-width:0;}
 
-    /* verdict color vars */
-    .vREJECT  { --v-text: #A32D2D; --v-bg: #FCEBEB; }
-    .vHOLD    { --v-text: #854F0B; --v-bg: #FAEEDA; }
-    .vAPPROVE { --v-text: #3B6D11; --v-bg: #EAF3DE; }
-    #verdict-text   { color: var(--v-text, #1C1917); }
-    #verdict-badge  { background: var(--v-bg, #F5F0EB); color: var(--v-text, #1C1917); }
+/* VERDICT HERO */
+.verdict-hero{padding:2rem 1.75rem 1.5rem;border-bottom:0.5px solid #E7E5E4;}
+.vh-eyebrow{font-size:9px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem;}
+.vh-project{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#1C1917;margin-bottom:1.25rem;}
+.vh-main{display:flex;align-items:flex-start;gap:1.5rem;}
+.vh-vblock{flex-shrink:0;}
+.vh-verdict{font-family:'Playfair Display',Georgia,serif;font-size:48px;font-weight:700;line-height:1;}
+.vh-verdict.reject{color:#A32D2D;}
+.vh-verdict.hold,.vh-verdict.review{color:#854F0B;}
+.vh-verdict.approve{color:#3B6D11;}
+.vh-badge{font-size:10px;font-weight:500;padding:3px 10px;border-radius:4px;display:inline-block;margin-top:5px;}
+.vh-badge.reject{background:#FCEBEB;color:#A32D2D;}
+.vh-badge.hold,.vh-badge.review{background:#FAEEDA;color:#854F0B;}
+.vh-badge.approve{background:#EAF3DE;color:#3B6D11;}
+.vh-reason{flex:1;}
+.vh-rl{font-size:9px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.35rem;}
+.vh-rt{font-size:13px;color:#1C1917;line-height:1.6;font-weight:500;margin-bottom:0.75rem;}
+.vh-rule{font-size:10px;color:#78716C;background:#F5F0EB;border-left:2px solid #44403C;padding:5px 10px;border-radius:0 5px 5px 0;}
+.vh-meta{display:flex;gap:1.5rem;margin-top:1.25rem;flex-wrap:wrap;}
+.vh-ml{font-size:8px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1px;}
+.vh-mv{font-size:11px;color:#44403C;font-weight:500;}
 
-    /* colorblind overrides */
-    body.cb .vREJECT  { --v-text: #005C99; --v-bg: #D6E8FF; }
-    body.cb .vHOLD    { --v-text: #5C4400; --v-bg: #FFF3CC; }
-    body.cb .vAPPROVE { --v-text: #005C00; --v-bg: #D6F0D6; }
+/* SECTIONS */
+.section{padding:1.1rem 1.75rem;border-bottom:0.5px solid #E7E5E4;}
+.st{font-size:10px;font-weight:600;color:#1C1917;text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.st-line{flex:1;height:0.5px;background:#E7E5E4;}
+.st-hint{font-size:9px;color:#A8A29E;font-weight:400;text-transform:none;letter-spacing:0;white-space:nowrap;}
+.sb{display:none;margin-top:0.85rem;}
+.sb.open{display:block;}
 
-    /* ── Rule reference block ───────────────────────── */
-    #rule-block {
-      border-left: 2px solid var(--color-warm-slate); background: var(--color-rule-ref-bg);
-      border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 0 0 28px;
-      font-size: 13px; color: #44403C;
-    }
-    #rule-block .rule-label {
-      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-      color: #78716C; margin-bottom: 4px;
-    }
+/* ADDITIONAL FINDINGS */
+.af-item{margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid #F0EDE9;}
+.af-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.af-title{font-size:10.5px;font-weight:600;color:#1C1917;margin-bottom:4px;}
+.af-bullets{list-style:none;padding:0;}
+.af-bullets li{font-size:9.5px;color:#78716C;padding:2px 0 2px 12px;position:relative;line-height:1.5;}
+.af-bullets li::before{content:'·';position:absolute;left:0;color:#A8A29E;}
 
-    /* ── Section wrappers ───────────────────────────── */
-    .section { margin-bottom: 28px; }
-    .section-title {
-      font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-      color: #78716C; margin-bottom: 12px;
-    }
+/* SUBMISSION CONTEXT */
+.ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ctx-card{background:#fff;border:0.5px solid #E7E5E4;border-radius:8px;padding:10px 12px;}
+.ctx-label{font-size:8.5px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;}
+.ctx-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:0.5px solid #F5F5F4;font-size:10px;gap:8px;}
+.ctx-row:last-child{border:none;}
+.ctx-k{color:#78716C;flex-shrink:0;}
+.ctx-v{color:#1C1917;font-weight:500;text-align:right;}
+.ctx-signals{display:flex;flex-wrap:wrap;gap:4px;}
+.ctx-signal{font-size:9px;padding:2px 8px;border-radius:4px;background:#F5F0EB;color:#44403C;}
 
-    /* ── Expert cards grid ──────────────────────────── */
-    #experts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-    @media (max-width: 680px) { #experts-grid { grid-template-columns: 1fr; } }
+/* EXPERT CARDS */
+.expert-row{display:flex;gap:10px;align-items:flex-start;}
+.ec-wrap{flex:1;display:flex;flex-direction:column;}
 
-    .expert-card { border-radius: 12px; overflow: hidden; border: 1px solid var(--color-card-border); }
-    .expert-header {
-      height: 88px; padding: 12px 14px; color: #fff;
-      display: flex; flex-direction: column; justify-content: flex-start;
-    }
-    .expert-tag  { font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 3px; }
-    .expert-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
-    .expert-role { font-size: 8.5px; opacity: 0.7; margin-top: 2px; }
+.ec{border-radius:10px;overflow:hidden;border:0.5px solid #E7E5E4;}
+.ec-header{padding:12px 13px;height:88px;display:flex;flex-direction:column;justify-content:flex-start;flex-shrink:0;}
+.ec-tag{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.55);margin-bottom:4px;}
+.ec-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px;}
+.ec-role{font-size:8.5px;color:rgba(255,255,255,0.6);}
+.ec-body{padding:10px 13px 0;height:140px;display:flex;flex-direction:column;}
+.ec-risk-wrap{margin-bottom:6px;flex-shrink:0;}
+.ec-risk{font-size:13px;font-weight:700;padding:5px 12px;border-radius:6px;display:inline-block;}
+.ec-risk.hi{background:#FCEBEB;color:#A32D2D;}
+.ec-risk.md{background:#FAEEDA;color:#854F0B;}
+.ec-risk.lo{background:#EAF3DE;color:#3B6D11;}
+.ec-trigger{font-size:8.5px;margin-top:3px;font-weight:500;}
+.ec-dims{display:flex;gap:3px;flex-wrap:wrap;margin-top:8px;}
+.dim-pill{font-size:7.5px;padding:2px 7px;border-radius:100px;border:0.5px solid;}
+.ec-footer{padding:0 13px 10px;border-radius:0 0 10px 10px;}
+.ec-divider{height:0.5px;background:#E0E0E0;margin-bottom:0;}
+.ec-expand-btn{font-size:9px;padding:8px 0 2px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;display:block;border:none;background:none;font-family:'Inter',sans-serif;text-align:left;}
 
-    .expert-body {
-      height: 140px; padding: 12px 14px; overflow: hidden;
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .overall-pill {
-      display: inline-block; padding: 3px 11px; border-radius: 12px;
-      font-size: 11px; font-weight: 600; align-self: flex-start;
-    }
-    .sev-HIGH   { background: var(--color-high-bg); color: var(--color-high-text); }
-    .sev-MEDIUM { background: var(--color-med-bg);  color: var(--color-med-text);  }
-    .sev-LOW    { background: var(--color-low-bg);  color: var(--color-low-text);  }
-    body.cb .sev-HIGH   { background: #D6E8FF; color: #005C99; }
-    body.cb .sev-MEDIUM { background: #FFF3CC; color: #5C4400; }
-    body.cb .sev-LOW    { background: #D6F0D6; color: #005C00; }
+.ec-scores{display:none;border:0.5px solid #E7E5E4;border-top:none;border-radius:0 0 10px 10px;padding:0 13px;margin-top:-1px;}
+.ec-scores.open{display:block;padding-bottom:10px;}
+.ds-row{display:flex;align-items:center;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.05);}
+.ds-row:last-child{border:none;}
+.ds-name{font-size:9px;flex:1;}
+.ds-core{font-size:7.5px;font-weight:500;padding:1px 5px;border-radius:3px;background:#F0EDE9;color:#78716C;margin-right:5px;flex-shrink:0;}
+.ds-tag{font-size:8px;font-weight:700;padding:1.5px 7px;border-radius:3px;flex-shrink:0;min-width:32px;text-align:center;}
+.ds-tag.hi{background:#FCEBEB;color:#A32D2D;}
+.ds-tag.md{background:#FAEEDA;color:#854F0B;}
+.ds-tag.lo{background:#EAF3DE;color:#3B6D11;}
 
-    .trigger-text { font-size: 11px; color: #78716C; line-height: 1.4; overflow: hidden; flex: 1; }
-    .dim-pills { display: flex; flex-wrap: wrap; gap: 5px; }
-    .dim-pill {
-      font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 8px;
-      border: 1px solid transparent;
-    }
+/* Expert colors */
+.e1 .ec-header{background:#3D6070;}
+.e1 .ec-body,.e1 .ec-footer,.e1 .ec-scores{background:#F2F7FA;}
+.e1 .dim-pill{background:#E0EDF5;color:#3D6070;border-color:#B8D4E2;}
+.e1 .ec-trigger,.e1 .ec-expand-btn,.e1 .ds-name{color:#3D6070;}
 
-    .expert-footer {
-      padding: 9px 14px; border-top: 1px solid var(--color-divider);
-    }
-    .see-scores-btn {
-      background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600;
-      text-decoration: underline; padding: 0; transition: opacity 0.15s;
-    }
-    .see-scores-btn:hover { opacity: 0.7; }
+.e2 .ec-header{background:#4A4880;}
+.e2 .ec-body,.e2 .ec-footer,.e2 .ec-scores{background:#F3F2FA;}
+.e2 .dim-pill{background:#E2E1F5;color:#4A4880;border-color:#BBBAE0;}
+.e2 .ec-trigger,.e2 .ec-expand-btn,.e2 .ds-name{color:#4A4880;}
 
-    /* ── Scores panel (renders below grid) ──────────── */
-    #scores-panel {
-      display: none; border: 1px solid var(--color-card-border);
-      border-radius: 10px; overflow: hidden; margin-bottom: 28px;
-    }
-    #scores-panel.open { display: block; }
-    .scores-header {
-      padding: 10px 16px; font-size: 11px; font-weight: 600; color: #fff;
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .score-row {
-      display: flex; align-items: center; gap: 10px; padding: 9px 16px;
-      border-bottom: 1px solid var(--color-card-border); font-size: 13px;
-    }
-    .score-row:last-child { border-bottom: none; }
-    .score-dim  { flex: 1; }
-    .score-core {
-      font-size: 9px; font-weight: 600; text-transform: uppercase; padding: 2px 7px;
-      border-radius: 4px; background: var(--color-core-bg); color: var(--color-core-text); flex-shrink: 0;
-    }
-    .score-badge {
-      min-width: 32px; text-align: center; font-size: 10px; font-weight: 600;
-      padding: 2px 8px; border-radius: 6px; flex-shrink: 0;
-    }
+.e3 .ec-header{background:#634078;}
+.e3 .ec-body,.e3 .ec-footer,.e3 .ec-scores{background:#F6F1FA;}
+.e3 .dim-pill{background:#EAE0F5;color:#634078;border-color:#CBAFE0;}
+.e3 .ec-trigger,.e3 .ec-expand-btn,.e3 .ds-name{color:#634078;}
 
-    /* ── Collapsible sections ────────────────────────── */
-    .collapsible { margin-bottom: 10px; border: 1px solid var(--color-card-border); border-radius: 10px; overflow: hidden; }
-    .collapsible-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 13px 16px; background: var(--color-rule-ref-bg); cursor: pointer;
-      font-size: 13px; font-weight: 600; user-select: none;
-    }
-    .collapsible-header .chevron { font-size: 12px; transition: transform 0.2s; color: #78716C; }
-    .collapsible-header.open .chevron { transform: rotate(180deg); }
-    .collapsible-body { display: none; padding: 14px 16px; background: #fff; }
-    .collapsible-body.open { display: block; }
+/* REGULATORY */
+.reg-list{display:flex;flex-direction:column;gap:6px;}
+.reg-item{display:flex;gap:10px;padding:8px 12px;border-radius:7px;border:0.5px solid #E7E5E4;background:#fff;align-items:flex-start;}
+.reg-sev{font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:1px;}
+.reg-sev.hi{background:#FCEBEB;color:#A32D2D;}
+.reg-sev.md{background:#FAEEDA;color:#854F0B;}
+.reg-fw{font-size:10px;font-weight:600;color:#1C1917;margin-bottom:2px;}
+.reg-prov{font-size:9.5px;color:#78716C;line-height:1.5;}
+.reg-src{font-size:8px;color:#A8A29E;margin-top:2px;}
 
-    /* ── Findings / violations ──────────────────────── */
-    .finding-item {
-      padding: 10px 14px; margin-bottom: 8px; border-radius: 8px;
-      font-size: 13px; line-height: 1.5;
-      border-left: 3px solid #D4A820; background: var(--color-med-bg);
-    }
-    .finding-item:last-child { margin-bottom: 0; }
+/* EVIDENCE QUALITY */
+.eq-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:0.6rem;}
+.eq-chip{font-size:9px;padding:3px 9px;border-radius:5px;border:0.5px solid #E7E5E4;color:#78716C;background:#fff;}
+.eq-chip.weak{border-color:#FAC775;color:#854F0B;background:#FAEEDA;}
+.eq-note{font-size:9.5px;color:#78716C;line-height:1.5;border-left:2px solid #E7E5E4;padding-left:8px;}
 
-    .weak-item {
-      border: 1px solid var(--color-weak-border); background: var(--color-weak-bg);
-      border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 13px;
-    }
+/* TRANSLATION */
+.tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.tl-item{padding:6px 10px;background:#fff;border:0.5px solid #E7E5E4;border-radius:6px;}
+.tl-label{font-size:8px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;}
+.tl-val{font-size:11px;color:#1C1917;font-weight:500;}
 
-    /* ── Recommendations (always visible) ───────────── */
-    #recs-section { margin-bottom: 28px; }
-    .rec-item {
-      display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--color-card-border);
-      font-size: 13px; line-height: 1.5;
-    }
-    .rec-item:last-child { border-bottom: none; }
-    .rec-num {
-      font-size: 11px; font-weight: 600; color: #A8A29E; flex-shrink: 0;
-      width: 22px; padding-top: 1px;
-    }
-    .rec-source { font-size: 11px; color: #A8A29E; margin-left: auto; flex-shrink: 0; padding-left: 12px; }
+/* RECOMMENDATIONS */
+.rec-list{display:flex;flex-direction:column;gap:6px;}
+.rec-item{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:#F5F0EB;border-radius:7px;}
+.rec-num{font-size:10px;font-weight:700;color:#44403C;flex-shrink:0;width:18px;}
+.rec-text{font-size:10.5px;color:#1C1917;line-height:1.5;}
+.rec-source{font-size:9px;color:#A8A29E;font-style:italic;}
 
-    /* ── Raw payload ────────────────────────────────── */
-    .raw-pre {
-      background: #1C1917; color: #E7E5E4; padding: 16px; border-radius: 8px;
-      font-size: 11px; font-family: monospace; overflow-x: auto; max-height: 400px; overflow-y: auto;
-      white-space: pre-wrap; word-break: break-all;
-    }
+/* RAW JSON */
+.raw-pre{font-family:monospace;font-size:8.5px;color:#44403C;background:#fff;border:0.5px solid #E7E5E4;border-radius:7px;padding:10px 12px;max-height:140px;overflow-y:auto;line-height:1.6;white-space:pre-wrap;word-break:break-all;}
 
-    /* ── Download bar ───────────────────────────────── */
-    #download-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: #fff; border-top: 1px solid var(--color-card-border);
-      padding: 12px 36px; display: flex; align-items: center; justify-content: space-between;
-      gap: 14px; box-shadow: 0 -4px 18px rgba(0,0,0,0.07); z-index: 50;
-    }
-    #download-bar.hidden { display: none; }
-    .dl-label { font-size: 12px; color: #78716C; }
-    .dl-buttons { display: flex; gap: 9px; }
-    .btn-dl-pdf, .btn-dl-json {
-      padding: 8px 18px; border-radius: 8px; font-size: 12px; font-weight: 600;
-      cursor: pointer; text-decoration: none; display: inline-block; transition: opacity 0.15s;
-    }
-    .btn-dl-pdf  { background: var(--color-warm-slate); color: #fff; border: none; }
-    .btn-dl-json { background: #fff; color: var(--color-warm-slate); border: 1.5px solid #D6D3D1; }
-    .btn-dl-pdf:hover, .btn-dl-json:hover { opacity: 0.82; }
+/* DOWNLOAD BAR */
+.dl-bar{padding:1rem 1.75rem;background:#F5F0EB;border-top:0.5px solid #E7E5E4;display:flex;gap:10px;align-items:center;position:sticky;bottom:0;}
+.dl-label{font-size:10px;color:#78716C;flex:1;}
+.dl-grp{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.dl-btn{font-size:10.5px;font-weight:500;padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;}
+.dl-btn.pdf{background:#44403C;color:#FAFAF8;}
+.dl-btn.pdf:hover{background:#1C1917;}
+.dl-btn.json{background:#fff;color:#44403C;border:0.5px solid #D6D3D1;}
+.dl-btn.json:hover{background:#F5F0EB;}
+.dl-hint{font-size:8px;color:#A8A29E;}
 
-    /* ── Empty state ────────────────────────────────── */
-    #no-data { text-align: center; padding: 80px 20px; color: #78716C; display: none; }
-    #no-data h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 10px; }
-  </style>
+/* Loading / error states */
+.loading-msg{padding:3rem 1.75rem;color:#A8A29E;font-size:13px;text-align:center;}
+.no-data-msg{padding:2rem 1.75rem;}
+.no-data-msg a{color:#44403C;}
+</style>
 </head>
 <body>
-  <div id="topbar">
-    <span class="wordmark">SAFE</span>
-    <button class="btn-new" onclick="window.location.href='/'">New Evaluation</button>
+<div class="page" id="page">
+
+  <!-- SIDEBAR -->
+  <div class="left">
+    <div class="logo">SAFE</div>
+    <div class="logo-sub">Safety Assurance<br>Framework for Evaluation</div>
+    <div class="nav-item active"><div class="nav-dot active"></div><div class="nav-text active">Evaluation result</div></div>
+    <div class="nav-item" onclick="window.location='/'"><div class="nav-dot"></div><div class="nav-text">New evaluation</div></div>
+    <div class="left-spacer"></div>
+    <button class="back-btn" onclick="window.location='/'">&#8592; Back to input</button>
+    <div class="left-meta">UNICC AI Safety Lab<br>NYU MSMA Capstone SP26<br>Team 6 &middot; v1.2</div>
   </div>
 
-  <div id="page">
-    <div id="no-data">
-      <h2>No result found</h2>
-      <p>Please start a new evaluation from the home page.</p>
-      <br/>
-      <button class="btn-new" style="background:var(--color-warm-slate);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;" onclick="window.location.href='/'">Go to Home</button>
-    </div>
+  <!-- RIGHT -->
+  <div class="right" id="right-panel">
+    <div class="loading-msg" id="loading-msg">Loading evaluation result…</div>
   </div>
 
-  <div id="download-bar" class="hidden">
-    <span class="dl-label" id="dl-label">Evaluation complete</span>
-    <div class="dl-buttons">
-      <a class="btn-dl-json" id="dl-json-btn" href="#">Download JSON</a>
-      <a class="btn-dl-pdf"  id="dl-pdf-btn"  href="#" target="_blank">Download PDF Report</a>
-    </div>
+</div>
+
+<!-- DOWNLOAD BAR (fixed bottom) -->
+<div class="dl-bar" id="dl-bar" style="display:none;position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);width:calc(100% - 4rem);max-width:960px;border-radius:0 0 14px 14px;border:0.5px solid #C8C0B8;border-top:0.5px solid #E7E5E4;">
+  <div class="dl-label">Download evaluation report</div>
+  <div class="dl-grp">
+    <button class="dl-btn pdf" id="dl-pdf">Download PDF report</button>
+    <div class="dl-hint">For human reviewers &amp; governance records</div>
   </div>
+  <div class="dl-grp">
+    <button class="dl-btn json" id="dl-json">Download JSON log</button>
+    <div class="dl-hint">For technical teams &amp; downstream processing</div>
+  </div>
+</div>
 
-  <script>
-    // ── Expert card palette ──────────────────────────
-    const CARD_STYLES = [
-      { label: 'Expert 1', headerBg: '#3D6070', bodyBg: '#F2F7FA', pillBg: '#E0EDF5', pillBorder: '#B8D4E2' },
-      { label: 'Expert 2', headerBg: '#4A4880', bodyBg: '#F3F2FA', pillBg: '#E2E1F5', pillBorder: '#BBBAE0' },
-      { label: 'Expert 3', headerBg: '#634078', bodyBg: '#F6F1FA', pillBg: '#EAE0F5', pillBorder: '#CBAFE0' },
-    ];
+<script>
+/* ── Expert metadata ── */
+var EXPERT_INFO={
+  'team3_risk_expert':{num:1,name:'Adversarial Security',role:'Jailbreak · Injection · Multilingual',cls:'e1'},
+  'team2_redteam_expert':{num:2,name:'Content Safety',role:'Harmful Content · Data · Bias',cls:'e2'},
+  'team1_policy_expert':{num:3,name:'Governance & UN',role:'Compliance · Neutrality · Equity',cls:'e3'}
+};
+var EXPERT_BY_NUM=[null,
+  {id:'team3_risk_expert',name:'Adversarial Security',role:'Jailbreak · Injection · Multilingual',cls:'e1'},
+  {id:'team2_redteam_expert',name:'Content Safety',role:'Harmful Content · Data · Bias',cls:'e2'},
+  {id:'team1_policy_expert',name:'Governance & UN',role:'Compliance · Neutrality · Equity',cls:'e3'}
+];
 
-    // Maps expert identifiers → card index and display info
-    const EXPERT_META = {
-      // New SAFE format
-      expert_adversarial_security: { idx: 0, name: 'Adversarial Security',  role: 'Jailbreak · Injection · Multilingual' },
-      expert_content_safety:       { idx: 1, name: 'Content Safety',         role: 'Data leakage · Bias · Compliance' },
-      expert_governance_un:        { idx: 2, name: 'Governance & UN',        role: 'EU AI Act · NIST · UNESCO · UN Charter' },
-      // Old orchestrator format
-      team1_policy_expert:   { idx: 0, name: 'Policy & Compliance',  role: 'Regulatory frameworks · Policy risk' },
-      team2_redteam_expert:  { idx: 1, name: 'Adversarial Misuse',   role: 'Red team · Attack surface · Misuse' },
-      team3_risk_expert:     { idx: 2, name: 'System & Deployment',  role: 'Architecture · Deployment risk' },
-    };
+var VERDICT_MAP={
+  'REJECT':{cls:'reject',badge:'Do not deploy into UNICC systems'},
+  'REVIEW':{cls:'hold',badge:'Human review required'},
+  'HOLD':{cls:'hold',badge:'Human review required'},
+  'APPROVE':{cls:'approve',badge:'Cleared for UNICC deployment'}
+};
 
-    const BADGE_TEXT = {
-      REJECT:  'Do not deploy into UNICC systems',
-      HOLD:    'Human review required',
-      APPROVE: 'Cleared for UNICC deployment',
-    };
+var BADGE_LABEL={
+  'REJECT':'REJECT',
+  'REVIEW':'HOLD',
+  'HOLD':'HOLD',
+  'APPROVE':'APPROVE'
+};
 
-    // ── Data detection & normalisation ──────────────
-    function isSafeFormat(data) { return 'verdict' in data; }
+var evalData=null;
+var evalId='';
 
-    function getVerdict(data) {
-      if (isSafeFormat(data)) return data.verdict;
-      const d = data.decision || 'HOLD';
-      return d === 'REVIEW' ? 'HOLD' : d;
+/* ── Helpers ── */
+function h(s){
+  if(!s&&s!==0) return '—';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function tog(id,hintId){
+  var el=document.getElementById(id);
+  var hint=document.getElementById(hintId);
+  if(!el) return;
+  el.classList.toggle('open');
+  if(hint) hint.textContent=el.classList.contains('open')?'▾ collapse':'▸ expand';
+}
+
+function togDs(id,btn){
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('open');
+  btn.textContent=el.classList.contains('open')?'▾ Hide dimension scores':'▸ See dimension scores';
+}
+
+/* ── Risk tier → CSS class ── */
+function tierCls(t){
+  if(!t) return 'lo';
+  var u=t.toUpperCase();
+  if(u==='HIGH') return 'hi';
+  if(u==='MEDIUM'||u==='MED') return 'md';
+  return 'lo';
+}
+
+function tierLabel(t){
+  if(!t) return 'LOW';
+  var u=t.toUpperCase();
+  if(u==='HIGH') return 'HIGH';
+  if(u==='MEDIUM') return 'MEDIUM';
+  if(u==='MED') return 'MEDIUM';
+  return 'LOW';
+}
+
+/* ── Build expert card HTML ── */
+function buildExpertCard(expert, info, idx){
+  var eId='e'+idx+'ds';
+  var riskCls=tierCls(expert.risk_tier);
+  var riskLbl=tierLabel(expert.risk_tier);
+
+  // Trigger text
+  var triggerText='';
+  if(expert.risk_tier&&expert.risk_tier.toUpperCase()==='HIGH') triggerText='CORE dimension triggered';
+  else if(expert.risk_tier&&expert.risk_tier.toUpperCase()==='MEDIUM') triggerText='IMPORTANT dimension triggered';
+  else triggerText='All dimensions within acceptable range';
+
+  // Pills from findings (first 4)
+  var findings=expert.findings||[];
+  var pills=findings.slice(0,4).map(function(f){
+    var short=f.length>28?f.slice(0,25)+'…':f;
+    return '<div class="dim-pill '+info.cls+'">'+h(short)+'</div>';
+  }).join('');
+  if(!pills) pills='<div class="dim-pill '+info.cls+'" style="color:#A8A29E;border-color:#D6D3D1;">No findings</div>';
+
+  // Dimension score rows from findings
+  var scoreRows=findings.map(function(f,i){
+    var lvl=i===0&&riskCls==='hi'?'hi':i<2&&riskCls!=='lo'?riskCls:'lo';
+    var lbl=lvl==='hi'?'HIGH':lvl==='md'?'MED':'LOW';
+    return '<div class="ds-row"><span class="ds-name '+info.cls+'">'+h(f)+'</span><span class="ds-tag '+lvl+'">'+lbl+'</span></div>';
+  }).join('');
+
+  if(!scoreRows){
+    scoreRows='<div class="ds-row"><span class="ds-name '+info.cls+'" style="color:#A8A29E;">No dimension detail available</span></div>';
+  }
+
+  return '<div class="ec-wrap '+info.cls+'">'
+    +'<div class="ec '+info.cls+'">'
+      +'<div class="ec-header">'
+        +'<div class="ec-tag">Expert '+idx+'</div>'
+        +'<div class="ec-name">'+h(info.name)+'</div>'
+        +'<div class="ec-role">'+h(info.role)+'</div>'
+      +'</div>'
+      +'<div class="ec-body">'
+        +'<div class="ec-risk-wrap">'
+          +'<div class="ec-risk '+riskCls+'">'+riskLbl+'</div>'
+          +'<div class="ec-trigger">'+h(triggerText)+'</div>'
+        +'</div>'
+        +'<div class="ec-dims">'+pills+'</div>'
+      +'</div>'
+      +'<div class="ec-footer">'
+        +'<div class="ec-divider"></div>'
+        +'<button class="ec-expand-btn '+info.cls+'" onclick="togDs(\''+eId+'\',this)">&#9658; See dimension scores</button>'
+      +'</div>'
+    +'</div>'
+    +'<div class="ec-scores '+info.cls+'" id="'+eId+'">'+scoreRows+'</div>'
+  +'</div>';
+}
+
+/* ── Order experts: team3→e1, team2→e2, team1→e3 ── */
+function orderExperts(experts){
+  var order=['team3_risk_expert','team2_redteam_expert','team1_policy_expert'];
+  var result=[];
+  order.forEach(function(id){
+    var found=null;
+    if(experts){
+      for(var i=0;i<experts.length;i++){
+        if(experts[i].expert_name===id){found=experts[i];break;}
+      }
     }
+    result.push(found||{expert_name:id,risk_tier:'LOW',findings:[],summary:''});
+  });
+  return result;
+}
 
-    function mapRiskTier(tier, score) {
-      // Old format risk_tier values
-      if (tier === 'HIGH') return 'HIGH';
-      if (tier === 'MINIMAL' || tier === 'LIMITED' || tier === 'LOW') return 'LOW';
-      // Fall back to numeric score
-      if (typeof score === 'number') return score >= 0.65 ? 'HIGH' : score >= 0.35 ? 'MEDIUM' : 'LOW';
-      return 'MEDIUM';
+/* ── Render full result ── */
+function renderResult(data){
+  var verdict=data.decision||'REVIEW';
+  var vinfo=VERDICT_MAP[verdict]||VERDICT_MAP['REVIEW'];
+  var vbadgeLabel=BADGE_LABEL[verdict]||'HOLD';
+  var cr=data.council_result||{};
+  var ctx=data.submission||{};
+  var bs=data.behavior_summary||{};
+
+  var projectName=ctx.target_name||cr.rationale&&'Evaluation'||'Unnamed';
+  // Try to get project name from context in stored data
+  if(data._target_name) projectName=data._target_name;
+  if(data.submission&&data.submission.target_name) projectName=data.submission.target_name;
+  else if(data.expert_input&&data.expert_input.context&&data.expert_input.context.agent_name) projectName=data.expert_input.context.agent_name;
+
+  var inputLabel=data._input_label||'GitHub URL';
+  var execMode=data._exec_mode||'LLM API';
+  var duration=data._duration_sec?data._duration_sec+' sec':'—';
+
+  var rationale=cr.rationale||'No primary reason provided.';
+  var ruleRef=cr.decision_rule_triggered||'—';
+
+  var additionalFindings=[];
+  if(cr.key_evidence&&cr.key_evidence.length) additionalFindings=additionalFindings.concat(cr.key_evidence);
+  if(cr.triggered_by&&cr.triggered_by.length) additionalFindings=additionalFindings.concat(cr.triggered_by);
+
+  var recommendations=cr.recommended_actions||[];
+
+  var experts=orderExperts(data.experts);
+
+  /* Build expert cards */
+  var expertCards=experts.map(function(ex,i){
+    var num=i+1;
+    var info=EXPERT_INFO[ex.expert_name]||{num:num,name:'Expert '+num,role:'—',cls:['','e1','e2','e3'][num]||'e1'};
+    return buildExpertCard(ex,info,num);
+  }).join('');
+
+  /* Additional findings list */
+  var afHtml='';
+  if(additionalFindings.length){
+    afHtml=additionalFindings.map(function(f){
+      return '<div class="af-item"><ul class="af-bullets"><li>'+h(f)+'</li></ul></div>';
+    }).join('');
+  } else {
+    afHtml='<div style="font-size:9.5px;color:#A8A29E;">No additional findings.</div>';
+  }
+
+  /* Recommendations */
+  var recHtml='';
+  if(recommendations.length){
+    recHtml=recommendations.map(function(r,i){
+      var txt=typeof r==='string'?r:(r.text||r.action||JSON.stringify(r));
+      var src=r.source||r.expert||'';
+      return '<div class="rec-item"><div class="rec-num">'+String(i+1).padStart(2,'0')+'</div>'
+        +'<div class="rec-text">'+h(txt)+(src?'<br><span class="rec-source">&mdash; '+h(src)+'</span>':'')+'</div></div>';
+    }).join('');
+  } else {
+    recHtml='<div style="font-size:9.5px;color:#A8A29E;">No recommendations recorded.</div>';
+  }
+
+  /* Submission context */
+  var ctxSysHtml='<div class="ctx-row"><span class="ctx-k">Target</span><span class="ctx-v">'+h(projectName)+'</span></div>'
+    +'<div class="ctx-row"><span class="ctx-k">Source type</span><span class="ctx-v">'+h(inputLabel)+'</span></div>';
+  if(ctx.github_url) ctxSysHtml+='<div class="ctx-row"><span class="ctx-k">GitHub URL</span><span class="ctx-v" style="font-size:9px;word-break:break-all;">'+h(ctx.github_url)+'</span></div>';
+
+  /* Translation */
+  var tr=(data.behavior_summary)||{};
+  var trApplied=tr.translation_confidence!==undefined?'Yes':'No — input is English';
+  var trLang=tr.primary_language||'English';
+  var trJailbreak=tr.multilingual_jailbreak_forced_low?'Suspected':'No';
+
+  /* Raw JSON: strip large fields */
+  var rawData={
+    evaluation_id:data.evaluation_id,
+    decision:data.decision,
+    council_result:{decision:cr.decision,decision_rule_triggered:cr.decision_rule_triggered},
+    experts:(data.experts||[]).map(function(e){return{expert_name:e.expert_name,risk_tier:e.risk_tier};})
+  };
+
+  var html=
+  /* Verdict hero */
+  '<div class="verdict-hero">'
+    +'<div class="vh-eyebrow">Evaluation complete</div>'
+    +'<div class="vh-project">'+h(projectName)+'</div>'
+    +'<div class="vh-main">'
+      +'<div class="vh-vblock">'
+        +'<div class="vh-verdict '+vinfo.cls+'">'+h(vbadgeLabel)+'</div>'
+        +'<div class="vh-badge '+vinfo.cls+'">'+h(vinfo.badge)+'</div>'
+      +'</div>'
+      +'<div class="vh-reason">'
+        +'<div class="vh-rl">Primary decision reason</div>'
+        +'<div class="vh-rt">'+h(rationale)+'</div>'
+        +'<div class="vh-rule">Rule '+h(ruleRef)+' triggered &mdash; '+h(verdict==='REVIEW'?'HOLD':verdict)+' verdict</div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="vh-meta">'
+      +'<div><div class="vh-ml">Input type</div><div class="vh-mv">'+h(inputLabel)+'</div></div>'
+      +'<div><div class="vh-ml">Execution mode</div><div class="vh-mv">'+h(execMode)+'</div></div>'
+      +'<div><div class="vh-ml">Evaluation ID</div><div class="vh-mv" style="font-size:9.5px;font-family:monospace;">'+h(data.evaluation_id||'—')+'</div></div>'
+      +'<div><div class="vh-ml">Duration</div><div class="vh-mv">'+h(duration)+'</div></div>'
+    +'</div>'
+  +'</div>'
+
+  /* Additional findings (default collapsed) */
+  +'<div class="section">'
+    +'<div class="st" onclick="tog(\'af\',\'af-h\')">Additional findings<span class="st-hint" id="af-h">&#9658; expand</span><div class="st-line"></div></div>'
+    +'<div class="sb" id="af">'+afHtml+'</div>'
+  +'</div>'
+
+  /* Submission context (default collapsed) */
+  +'<div class="section">'
+    +'<div class="st" onclick="tog(\'ctx\',\'ctx-h\')">Submission context<span class="st-hint" id="ctx-h">&#9658; expand</span><div class="st-line"></div></div>'
+    +'<div class="sb" id="ctx">'
+      +'<div class="ctx-grid">'
+        +'<div class="ctx-card"><div class="ctx-label">System information</div>'+ctxSysHtml+'</div>'
+        +'<div class="ctx-card"><div class="ctx-label">Evaluation metadata</div>'
+          +'<div class="ctx-row"><span class="ctx-k">Mode</span><span class="ctx-v">'+h(execMode)+'</span></div>'
+          +'<div class="ctx-row"><span class="ctx-k">Version</span><span class="ctx-v">'+(data.version&&data.version.schema_version?h(data.version.schema_version):'v3')+'</span></div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+  +'</div>'
+
+  /* Expert Council (default open) */
+  +'<div class="section">'
+    +'<div class="st" onclick="tog(\'exp\',\'exp-h\')">Expert Council<span class="st-hint" id="exp-h">&#9660; collapse</span><div class="st-line"></div></div>'
+    +'<div class="sb open" id="exp">'
+      +'<div class="expert-row">'+expertCards+'</div>'
+    +'</div>'
+  +'</div>'
+
+  /* Regulatory violations (collapsed) */
+  +'<div class="section">'
+    +'<div class="st" onclick="tog(\'reg\',\'reg-h\')">Regulatory violations<span class="st-hint" id="reg-h">&#9658; expand</span><div class="st-line"></div></div>'
+    +'<div class="sb" id="reg">'+buildRegViolations(data)+'</div>'
+  +'</div>'
+
+  /* Evidence quality (collapsed) */
+  +'<div class="section">'
+    +'<div class="st" onclick="tog(\'eq\',\'eq-h\')">Evidence quality<span class="st-hint" id="eq-h">&#9658; expand</span><div class="st-line"></div></div>'
+    +'<div class="sb" id="eq">'+buildEvidenceQuality(data)+'</div>'
+  +'</div>'
+
+  /* Translation report (collapsed) */
+  +'<div class="section">'
+    +'<div class="st" onclick="tog(\'tl\',\'tl-h\')">Translation report<span class="st-hint" id="tl-h">&#9658; expand</span><div class="st-line"></div></div>'
+    +'<div class="sb" id="tl">'
+      +'<div class="tl-grid">'
+        +'<div class="tl-item"><div class="tl-label">Primary language</div><div class="tl-val">'+h(trLang)+'</div></div>'
+        +'<div class="tl-item"><div class="tl-label">Translation applied</div><div class="tl-val">'+h(trApplied)+'</div></div>'
+        +'<div class="tl-item"><div class="tl-label">Multilingual jailbreak suspected</div><div class="tl-val">'+h(trJailbreak)+'</div></div>'
+        +'<div class="tl-item"><div class="tl-label">Translation confidence</div><div class="tl-val">N/A</div></div>'
+      +'</div>'
+    +'</div>'
+  +'</div>'
+
+  /* Recommendations (always expanded) */
+  +'<div class="section">'
+    +'<div class="st">Recommendations<div class="st-line"></div></div>'
+    +'<div style="margin-top:0.85rem"><div class="rec-list">'+recHtml+'</div></div>'
+  +'</div>'
+
+  /* Raw payload (collapsed) */
+  +'<div class="section">'
+    +'<div class="st" onclick="tog(\'raw\',\'raw-h\')">Raw evaluation payload<span class="st-hint" id="raw-h">&#9658; expand</span><div class="st-line"></div></div>'
+    +'<div class="sb" id="raw"><div class="raw-pre">'+h(JSON.stringify(rawData,null,2))+'</div></div>'
+  +'</div>'
+
+  /* spacer for download bar */
+  +'<div style="height:4rem;"></div>';
+
+  document.getElementById('right-panel').innerHTML=html;
+
+  /* Show download bar */
+  document.getElementById('dl-bar').style.display='flex';
+  document.getElementById('dl-pdf').onclick=function(){
+    window.open('/v1/evaluations/'+encodeURIComponent(evalId)+'/pdf','_blank');
+  };
+  document.getElementById('dl-json').onclick=function(){
+    window.open('/v1/evaluations/'+encodeURIComponent(evalId)+'/json','_blank');
+  };
+}
+
+function buildRegViolations(data){
+  var cr=data.council_result||{};
+  var experts=data.experts||[];
+  var items=[];
+  experts.forEach(function(ex){
+    if(ex.detail_payload&&ex.detail_payload.violations){
+      ex.detail_payload.violations.forEach(function(v){
+        items.push({sev:ex.risk_tier,fw:v.framework||v.policy||'',prov:v.reason||v.provision||'',src:ex.expert_name});
+      });
     }
-
-    function normaliseExperts(data) {
-      const safe = isSafeFormat(data);
-      return (data.experts || []).map((e, i) => {
-        const key  = safe ? e.id : e.expert_name;
-        const meta = EXPERT_META[key] || { idx: i, name: key, role: '' };
-        if (safe) {
-          // ExpertOutput
-          return {
-            idx:     meta.idx,
-            name:    meta.name,
-            role:    meta.role,
-            overall: e.overall,
-            summary: '',
-            pills:   (e.triggered_dimensions || []).map(d => d.display_name || d.name),
-            dims:    (e.triggered_dimensions || []).map(d => ({
-              name:  d.display_name || d.name,
-              tier:  d.tier,
-              level: d.level,
-            })),
-          };
-        } else {
-          // ExpertVerdict
-          const overall = mapRiskTier(e.risk_tier, e.risk_score);
-          return {
-            idx:     meta.idx,
-            name:    meta.name,
-            role:    meta.role,
-            overall: overall,
-            summary: e.summary || '',
-            pills:   (e.findings || []).slice(0, 4).map(f => f.length > 36 ? f.slice(0, 33) + '…' : f),
-            dims:    (e.findings || []).map(f => ({ name: f, tier: null, level: overall })),
-          };
+    if(ex.detail_payload&&ex.detail_payload.policy_alerts){
+      ex.detail_payload.policy_alerts.forEach(function(a){
+        if(a.status!=='pass'){
+          items.push({sev:a.status==='fail'?'HIGH':'MEDIUM',fw:a.policy||'',prov:a.reason||'',src:ex.expert_name});
         }
-      }).sort((a, b) => a.idx - b.idx);
-    }
-
-    function getPrimaryRule(data) {
-      if (isSafeFormat(data)) {
-        const pr = data.primary_reason;
-        return typeof pr === 'string' ? pr : (pr?.rule || JSON.stringify(pr || ''));
-      }
-      return data.council_result?.decision_rule_triggered || '';
-    }
-
-    function getAdditionalFindings(data) {
-      if (isSafeFormat(data)) return data.additional_findings || [];
-      const cr = data.council_result || {};
-      return [...(cr.cross_expert_critique || []), ...(cr.key_evidence || [])].filter(Boolean);
-    }
-
-    function getRecommendations(data) {
-      if (isSafeFormat(data)) {
-        return (data.recommendations || []).map(r => typeof r === 'string' ? r : (r?.text || JSON.stringify(r)));
-      }
-      return data.council_result?.recommended_actions || [];
-    }
-
-    function getTranslationInfo(data) {
-      if (isSafeFormat(data)) return data.translation_report;
-      const bs = data.behavior_summary;
-      if (!bs) return null;
-      return {
-        translation_applied: false,
-        primary_language: bs.primary_language || 'unknown',
-        confidence_numeric: bs.translation_confidence,
-        confidence_warning: bs.uncertainty_flag,
-        multilingual_jailbreak_suspected: bs.multilingual_jailbreak_forced_low,
-        detected_languages: bs.detected_languages,
-      };
-    }
-
-    // ── Render ───────────────────────────────────────
-    function render(data) {
-      const page    = document.getElementById('page');
-      const verdict = getVerdict(data);
-      const experts = normaliseExperts(data);
-      const rule    = getPrimaryRule(data);
-      const id      = data.evaluation_id || '—';
-      const ts      = data.timestamp || '';
-
-      // Verdict hero
-      const hero = el('div', 'verdict-hero v' + verdict);
-      hero.id = 'verdict-hero';
-      const execMode = experts[0]?.role ? '' : '';
-      const inputType = isSafeFormat(data)
-        ? (data.submission_context?.input_type || '')
-        : (data.behavior_summary?.evaluation_mode || data.experts?.[0]?.evidence?.execution_path || '');
-      hero.innerHTML = `
-        <div id="verdict-text">${esc(verdict)}</div>
-        <div id="verdict-badge">${esc(BADGE_TEXT[verdict] || verdict)}</div>
-        <div id="meta-row">
-          ${inputType ? `<span>${esc(inputType)}</span><span class="meta-dot">·</span>` : ''}
-          <span>ID: ${esc(id)}</span>
-          ${ts ? `<span class="meta-dot">·</span><span>${esc(ts.slice(0,19).replace('T',' '))}</span>` : ''}
-        </div>`;
-      page.appendChild(hero);
-
-      // Rule reference
-      if (rule) {
-        const rb = el('div');
-        rb.id = 'rule-block';
-        rb.innerHTML = `<div class="rule-label">Decision Rule</div>${esc(rule)}`;
-        page.appendChild(rb);
-      }
-
-      // Expert Council section
-      const councilSec = el('div', 'section');
-      const gridLabel  = el('div', 'section-title');
-      gridLabel.textContent = 'Expert Council';
-      councilSec.appendChild(gridLabel);
-
-      const grid = el('div');
-      grid.id = 'experts-grid';
-
-      // Scores panel (outside grid)
-      const scoresPanel = el('div');
-      scoresPanel.id = 'scores-panel';
-
-      let activeScoresIdx = -1;
-
-      experts.forEach((expert, i) => {
-        const style = CARD_STYLES[expert.idx] || CARD_STYLES[i % 3];
-        const card  = el('div', 'expert-card');
-
-        // Header
-        const header = el('div', 'expert-header');
-        header.style.background = style.headerBg;
-        header.innerHTML = `
-          <div class="expert-tag">${esc(style.label)}</div>
-          <div class="expert-name">${esc(expert.name)}</div>
-          <div class="expert-role">${esc(expert.role)}</div>`;
-
-        // Body
-        const body = el('div', 'expert-body');
-        body.style.background = style.bodyBg;
-        const pillsHtml = expert.pills.length
-          ? expert.pills.map(p =>
-              `<span class="dim-pill sev-${expert.overall}" style="background:${style.pillBg};border-color:${style.pillBorder}">` +
-              (expert.overall === 'HIGH' ? '● ' : '') + esc(p) + `</span>`
-            ).join('')
-          : '<span style="font-size:11px;color:#A8A29E">No issues detected</span>';
-        body.innerHTML = `
-          <div class="overall-pill sev-${expert.overall}">${esc(expert.overall)}</div>
-          <div class="trigger-text">${esc(expert.summary)}</div>
-          <div class="dim-pills">${pillsHtml}</div>`;
-
-        // Footer
-        const footer = el('div', 'expert-footer');
-        footer.style.background = style.bodyBg;
-        const btn = el('button', 'see-scores-btn');
-        btn.textContent = '▸ See dimension scores';
-        btn.style.color = style.headerBg;
-        btn.addEventListener('click', () => {
-          if (activeScoresIdx === i) {
-            // collapse
-            activeScoresIdx = -1;
-            scoresPanel.classList.remove('open');
-            btn.textContent = '▸ See dimension scores';
-          } else {
-            activeScoresIdx = i;
-            renderScores(scoresPanel, expert, style);
-            scoresPanel.classList.add('open');
-            // reset all buttons
-            grid.querySelectorAll('.see-scores-btn').forEach(b => {
-              b.textContent = '▸ See dimension scores';
-            });
-            btn.textContent = '▾ Hide dimension scores';
-          }
-        });
-        footer.appendChild(btn);
-
-        card.appendChild(header);
-        card.appendChild(body);
-        card.appendChild(footer);
-        grid.appendChild(card);
-      });
-
-      councilSec.appendChild(grid);
-      councilSec.appendChild(scoresPanel);
-      page.appendChild(councilSec);
-
-      // Additional findings
-      const findings = getAdditionalFindings(data);
-      if (findings.length) {
-        page.appendChild(makeCollapsible('Additional Findings', findings.map(f =>
-          `<div class="finding-item">${esc(f)}</div>`
-        ).join(''), false));
-      }
-
-      // Submission context
-      const subCtx = buildSubmissionContext(data);
-      if (subCtx) page.appendChild(makeCollapsible('Submission Context', subCtx, false));
-
-      // Regulatory violations (SAFE format only)
-      if (isSafeFormat(data)) {
-        const violations = buildViolations(data);
-        if (violations) page.appendChild(makeCollapsible('Regulatory Violations', violations, false));
-      }
-
-      // Evidence quality (SAFE format only)
-      if (isSafeFormat(data)) {
-        const evq = buildEvidenceQuality(data);
-        if (evq) page.appendChild(makeCollapsible('Evidence Quality', evq, false));
-      }
-
-      // Translation report
-      const tinfo = getTranslationInfo(data);
-      if (tinfo) {
-        const tr = buildTranslationReport(tinfo);
-        if (tr) page.appendChild(makeCollapsible('Translation Report', tr, false));
-      }
-
-      // Recommendations (always visible)
-      const recs = getRecommendations(data);
-      if (recs.length) {
-        const recSec = el('div', 'section');
-        recSec.id = 'recs-section';
-        const recTitle = el('div', 'section-title');
-        recTitle.textContent = `Recommendations (${recs.length})`;
-        recSec.appendChild(recTitle);
-        const recList = el('div');
-        recs.forEach((r, i) => {
-          const item = el('div', 'rec-item');
-          item.innerHTML = `<span class="rec-num">${i + 1}.</span><span>${esc(r)}</span>`;
-          recList.appendChild(item);
-        });
-        recSec.appendChild(recList);
-        page.appendChild(recSec);
-      }
-
-      // Raw evaluation payload
-      const safeRaw = Object.assign({}, data);
-      // Strip sensitive input content per security requirement
-      if (safeRaw.expert_input) delete safeRaw.expert_input;
-      if (safeRaw.conversation) delete safeRaw.conversation;
-      page.appendChild(makeCollapsible(
-        'Raw Evaluation Payload',
-        `<pre class="raw-pre">${esc(JSON.stringify(safeRaw, null, 2))}</pre>`,
-        false
-      ));
-
-      // Download bar
-      const bar = document.getElementById('download-bar');
-      bar.classList.remove('hidden');
-      document.getElementById('dl-label').textContent = `${verdict} · ${id}`;
-
-      // JSON download (client-side blob)
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const jsonBtn = document.getElementById('dl-json-btn');
-      jsonBtn.href = URL.createObjectURL(blob);
-      jsonBtn.download = `${id}.json`;
-
-      // Try server-side JSON endpoint too
-      if (id && id !== '—') {
-        jsonBtn.href = `/v1/evaluations/${encodeURIComponent(id)}/json`;
-        jsonBtn.download = '';
-        document.getElementById('dl-pdf-btn').href = `/v1/evaluations/${encodeURIComponent(id)}/pdf`;
-      }
-    }
-
-    function renderScores(panel, expert, style) {
-      panel.innerHTML = '';
-      const hdr = el('div', 'scores-header');
-      hdr.style.background = style.headerBg;
-      hdr.textContent = expert.name + ' — Dimension Scores';
-      panel.appendChild(hdr);
-
-      if (!expert.dims.length) {
-        const empty = el('div');
-        empty.style.cssText = 'padding:14px 16px;font-size:13px;color:#A8A29E;';
-        empty.textContent = 'No dimension scores available.';
-        panel.appendChild(empty);
-        return;
-      }
-      expert.dims.forEach(d => {
-        const row = el('div', 'score-row');
-        const nameEl = el('span', 'score-dim');
-        nameEl.textContent = d.name;
-        row.appendChild(nameEl);
-        if (d.tier === 'CORE' || d.tier === 'IMPORTANT') {
-          const chip = el('span', 'score-core');
-          chip.textContent = d.tier;
-          row.appendChild(chip);
-        }
-        const badge = el('span', 'score-badge sev-' + (d.level || 'LOW'));
-        badge.textContent = d.level || 'LOW';
-        row.appendChild(badge);
-        panel.appendChild(row);
       });
     }
+  });
+  if(!items.length){
+    return '<div style="font-size:9.5px;color:#A8A29E;">No regulatory violations recorded in this evaluation.</div>';
+  }
+  return '<div class="reg-list">'+items.map(function(item){
+    var sc=tierCls(item.sev);
+    return '<div class="reg-item">'
+      +'<div class="reg-sev '+sc+'">'+h(tierLabel(item.sev))+'</div>'
+      +'<div>'
+        +'<div class="reg-fw">'+h(item.fw)+'</div>'
+        +'<div class="reg-prov">'+h(item.prov)+'</div>'
+        +'<div class="reg-src">'+h(item.src)+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('')+'</div>';
+}
 
-    // ── Section builders ─────────────────────────────
-    function buildSubmissionContext(data) {
-      const parts = [];
-      if (isSafeFormat(data)) {
-        const ctx = data.submission_context || {};
-        if (ctx.target_name) parts.push(`<div class="review-item">Target: <strong>${esc(ctx.target_name)}</strong></div>`);
-        if (ctx.input_type)  parts.push(`<div class="review-item">Input type: <strong>${esc(ctx.input_type)}</strong></div>`);
-        if (ctx.evaluation_id) parts.push(`<div class="review-item">ID: <strong>${esc(ctx.evaluation_id)}</strong></div>`);
-      } else {
-        const sub = data.submission || {};
-        if (sub.target_name) parts.push(`<div class="review-item">Target: <strong>${esc(sub.target_name)}</strong></div>`);
-        if (sub.source_type) parts.push(`<div class="review-item">Source type: <strong>${esc(sub.source_type)}</strong></div>`);
-        if (sub.github_url)  parts.push(`<div class="review-item">GitHub URL: <strong>${esc(sub.github_url)}</strong></div>`);
-        const bs = data.behavior_summary;
-        if (bs) {
-          parts.push(`<div class="review-item">Evaluation mode: <strong>${esc(bs.evaluation_mode)}</strong></div>`);
-          parts.push(`<div class="review-item">Transcript present: <strong>${bs.transcript_present ? 'Yes' : 'No'}</strong></div>`);
-        }
-      }
-      return parts.length ? `<div style="font-size:13px;line-height:2;">${parts.join('')}</div>` : null;
-    }
+function buildEvidenceQuality(data){
+  var experts=data.experts||[];
+  var chips=[];
+  experts.forEach(function(ex){
+    var inf=EXPERT_INFO[ex.expert_name];
+    var name=inf?inf.name:ex.expert_name;
+    var q=ex.evaluation_status==='success'?'Strong':ex.evaluation_status==='degraded'?'Partial':'Weak';
+    chips.push({name:name,q:q});
+  });
+  var chipsHtml=chips.map(function(c){
+    return '<div class="eq-chip'+(c.q==='Weak'?' weak':'')+'">'+h(c.name)+' &mdash; '+h(c.q)+'</div>';
+  }).join('');
+  if(!chipsHtml) chipsHtml='<div class="eq-chip">No evidence quality data</div>';
+  return '<div class="eq-chips">'+chipsHtml+'</div>'
+    +'<div class="eq-note">Evidence quality reflects the richness of the submitted artifact. Conversation evidence typically yields the strongest behavioral signal on jailbreak and bias dimensions.</div>';
+}
 
-    function buildViolations(data) {
-      // SAFE format: scan triggered dimensions for regulatory_anchor
-      const violations = [];
-      (data.experts || []).forEach(expert => {
-        (expert.triggered_dimensions || []).forEach(d => {
-          if (d.regulatory_anchor && d.level !== 'LOW') {
-            violations.push({
-              level: d.level,
-              anchor: d.regulatory_anchor,
-              name: d.display_name || d.name,
-              reason: d.reason || '',
-            });
-          }
-        });
+/* ── Load data ── */
+function loadResult(){
+  var params=new URLSearchParams(window.location.search);
+  evalId=params.get('id')||'';
+
+  // Try sessionStorage first
+  var stored=null;
+  try{ stored=JSON.parse(sessionStorage.getItem('safe_result')); } catch(e){}
+
+  if(stored&&(!evalId||stored.evaluation_id===evalId)){
+    evalData=stored;
+    renderResult(evalData);
+    return;
+  }
+
+  // If evalId mismatch or no sessionStorage, fetch JSON archive
+  if(evalId){
+    fetch('/v1/evaluations/'+encodeURIComponent(evalId)+'/json')
+      .then(function(r){
+        if(!r.ok) throw new Error('Not found');
+        return r.json();
+      })
+      .then(function(d){
+        evalData=d;
+        renderResult(evalData);
+      })
+      .catch(function(){
+        document.getElementById('right-panel').innerHTML=
+          '<div class="no-data-msg">'
+          +'<div style="font-size:13px;font-weight:600;color:#1C1917;margin-bottom:8px;">Result not found</div>'
+          +'<div style="font-size:11px;color:#78716C;">Evaluation ID: <code>'+h(evalId)+'</code></div>'
+          +'<div style="font-size:11px;color:#78716C;margin-top:8px;"><a href="/">&#8592; Run a new evaluation</a></div>'
+          +'</div>';
       });
-      if (!violations.length) return null;
-      return violations.map(v =>
-        `<div class="finding-item">
-          <span class="score-badge sev-${v.level}" style="display:inline-block;margin-right:8px;">${esc(v.level)}</span>
-          <strong>${esc(v.anchor)}</strong> — ${esc(v.name)}<br/>
-          <span style="font-size:12px;color:#78716C;">${esc(v.reason)}</span>
-        </div>`
-      ).join('');
-    }
+  } else {
+    document.getElementById('right-panel').innerHTML=
+      '<div class="no-data-msg">'
+      +'<div style="font-size:13px;font-weight:600;color:#1C1917;margin-bottom:8px;">No evaluation result found</div>'
+      +'<div style="font-size:11px;color:#78716C;"><a href="/">&#8592; Start a new evaluation</a></div>'
+      +'</div>';
+  }
+}
 
-    function buildEvidenceQuality(data) {
-      const weak = [];
-      (data.experts || []).forEach(expert => {
-        (expert.triggered_dimensions || []).forEach(d => {
-          if (d.evidence_quality === 'Weak') {
-            weak.push({ name: d.display_name || d.name, reason: d.reason || '' });
-          }
-        });
-      });
-      if (!weak.length) return null;
-      return weak.map(w =>
-        `<div class="weak-item"><strong>${esc(w.name)}</strong><br/><span style="font-size:12px;">${esc(w.reason)}</span></div>`
-      ).join('');
-    }
-
-    function buildTranslationReport(tr) {
-      if (!tr) return null;
-      const lines = [];
-      if (tr.translation_applied) {
-        lines.push(`<div class="review-item">Translation applied: <strong>Yes</strong></div>`);
-        lines.push(`<div class="review-item">Primary language: <strong>${esc(tr.primary_language || '—')}</strong></div>`);
-      } else {
-        lines.push(`<div class="review-item">Translation applied: <strong>No</strong></div>`);
-        lines.push(`<div class="review-item">Detected language: <strong>${esc(tr.primary_language || '—')}</strong></div>`);
-      }
-      if (tr.confidence_qualitative) {
-        lines.push(`<div class="review-item">Confidence: <strong>${esc(tr.confidence_qualitative)}</strong></div>`);
-        if (tr.confidence_note) lines.push(`<div style="font-size:12px;color:#78716C;margin-top:4px;">${esc(tr.confidence_note)}</div>`);
-      } else if (typeof tr.confidence_numeric === 'number') {
-        const pct = (tr.confidence_numeric * 100).toFixed(0) + '%';
-        lines.push(`<div class="review-item">Confidence: <strong>${pct}</strong></div>`);
-        if (tr.confidence_warning) {
-          lines.push(`<div class="weak-item" style="margin-top:8px;">⚠ Low confidence — translation uncertainty flag active</div>`);
-        }
-      }
-      if (tr.multilingual_jailbreak_suspected) {
-        lines.push(`<div class="finding-item" style="margin-top:8px;">Multilingual jailbreak pattern suspected in input.</div>`);
-      }
-      return `<div style="font-size:13px;line-height:1.9;">${lines.join('')}</div>`;
-    }
-
-    // ── Collapsible helper ───────────────────────────
-    function makeCollapsible(title, contentHtml, defaultOpen) {
-      const wrap  = el('div', 'collapsible');
-      const hdr   = el('div', 'collapsible-header' + (defaultOpen ? ' open' : ''));
-      hdr.innerHTML = `<span>${esc(title)}</span><span class="chevron">▼</span>`;
-      const body  = el('div', 'collapsible-body' + (defaultOpen ? ' open' : ''));
-      body.innerHTML = contentHtml;
-      hdr.addEventListener('click', () => {
-        hdr.classList.toggle('open');
-        body.classList.toggle('open');
-      });
-      wrap.appendChild(hdr);
-      wrap.appendChild(body);
-      return wrap;
-    }
-
-    // ── DOM helper ───────────────────────────────────
-    function el(tag, cls) {
-      const e = document.createElement(tag);
-      if (cls) e.className = cls;
-      return e;
-    }
-
-    function esc(s) {
-      return String(s ?? '')
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // ── Load data ────────────────────────────────────
-    const urlId = new URLSearchParams(window.location.search).get('id');
-    const raw   = sessionStorage.getItem('safe_result');
-
-    let data = null;
-    if (raw) {
-      try {
-        data = JSON.parse(raw);
-        // If URL has a different id, prefer the API response
-        if (urlId && data.evaluation_id && data.evaluation_id !== urlId) data = null;
-      } catch(e) { data = null; }
-    }
-
-    if (data) {
-      render(data);
-    } else if (urlId) {
-      fetch(`/v1/evaluations/${encodeURIComponent(urlId)}`)
-        .then(r => r.ok ? r.json() : Promise.reject(r.status))
-        .then(d => render(d))
-        .catch(() => { document.getElementById('no-data').style.display = 'block'; });
-    } else {
-      document.getElementById('no-data').style.display = 'block';
-    }
-
-    // ── Colorblind mode ──────────────────────────────
-    if (sessionStorage.getItem('safe_cb') === '1') document.body.classList.add('cb');
-  </script>
+loadResult();
+</script>
 </body>
 </html>

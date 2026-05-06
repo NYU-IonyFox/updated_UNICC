@@ -1,591 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SAFE — AI Safety Evaluation</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Inter, sans-serif; background: #F9F8F6; color: #1C1917; min-height: 100vh; display: flex; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SAFE — AI Safety Evaluation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem;}
 
-    /* ── Sidebar ─────────────────────────────────────── */
-    #sidebar {
-      width: 200px; min-height: 100vh; background: var(--color-warm-slate); color: #fff;
-      padding: 28px 20px; display: flex; flex-direction: column; gap: 28px; flex-shrink: 0;
-    }
-    .wordmark {
-      font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
-    }
-    .wordmark span {
-      display: block; font-family: Inter, sans-serif; font-size: 10px; font-weight: 400;
-      opacity: 0.55; margin-top: 3px; letter-spacing: 0;
-    }
-    .step-list { display: flex; flex-direction: column; gap: 6px; }
-    .step-item {
-      display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 7px;
-      cursor: pointer; font-size: 12px; font-weight: 600; opacity: 0.45; transition: opacity 0.15s, background 0.15s;
-    }
-    .step-item.active  { background: rgba(255,255,255,0.12); opacity: 1; }
-    .step-item.done    { opacity: 0.7; }
-    .step-num {
-      width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.35);
-      display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0;
-    }
-    .step-item.active .step-num { background: #fff; color: var(--color-warm-slate); border-color: #fff; }
-    .step-item.done   .step-num { background: rgba(255,255,255,0.18); border-color: transparent; }
+.w{display:flex;min-height:600px;border:0.5px solid #C8C0B8;border-radius:14px;overflow:hidden;font-family:'Inter',sans-serif;width:100%;max-width:900px;}
 
-    /* Colorblind toggle */
-    .cb-toggle { margin-top: auto; }
-    .cb-toggle label { display: flex; align-items: center; gap: 9px; font-size: 11px; cursor: pointer; opacity: 0.7; }
-    .cb-toggle input { width: 14px; height: 14px; accent-color: #fff; }
+/* SIDEBAR */
+.left{width:200px;flex-shrink:0;background:#44403C;padding:1.4rem 1.1rem;display:flex;flex-direction:column;}
+.logo{font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:700;color:#FAFAF8;letter-spacing:-0.01em;margin-bottom:0.15rem;}
+.logo-sub{font-size:7.5px;color:#A8A29E;line-height:1.65;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1.6rem;}
 
-    /* ── Main area ──────────────────────────────────── */
-    #main { flex: 1; padding: 44px 52px; max-width: 760px; }
-    h1 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 6px; }
-    .subtitle { color: #78716C; font-size: 13px; margin-bottom: 36px; }
+.steps{flex:1;}
+.step{display:flex;gap:9px;margin-bottom:1.1rem;align-items:flex-start;}
+.step-num{width:18px;height:18px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:500;flex-shrink:0;margin-top:1px;transition:all 0.2s;}
+.step.done .step-num{border-color:#D6D3D1;background:#D6D3D1;color:#44403C;}
+.step.active .step-num{border-color:#FAFAF8;color:#FAFAF8;}
+.step.next .step-num{border-color:#78716C;color:#78716C;}
+.step.future .step-num{border-color:#57534E;color:#57534E;}
+.step-body{}
+.step-title{font-size:10px;font-weight:500;margin-bottom:1px;}
+.step.done .step-title{color:#D6D3D1;}
+.step.active .step-title{color:#FAFAF8;}
+.step.next .step-title{color:#A8A29E;}
+.step.future .step-title{color:#57534E;}
+.step-desc{font-size:8.5px;line-height:1.5;}
+.step.done .step-desc{color:#A8A29E;}
+.step.active .step-desc{color:#D6D3D1;}
+.step.next .step-desc{color:#78716C;}
+.step.future .step-desc{color:#44403C;}
 
-    /* Step panels */
-    .step-panel { display: none; }
-    .step-panel.active { display: block; }
+.left-bottom{border-top:0.5px solid #57534E;padding-top:0.85rem;}
+.cb-row{display:flex;align-items:center;gap:7px;margin-bottom:0.6rem;}
+.cb-lbl{font-size:8.5px;color:#A8A29E;flex:1;}
+.cb-lbl.on{color:#D6D3D1;}
+.toggle{width:26px;height:14px;background:#57534E;border-radius:100px;cursor:pointer;position:relative;flex-shrink:0;border:none;transition:background 0.2s;}
+.toggle.on{background:#A8A29E;}
+.thumb{width:9px;height:9px;background:#78716C;border-radius:50%;position:absolute;top:2.5px;left:2.5px;transition:all 0.2s;}
+.toggle.on .thumb{left:14.5px;background:#FAFAF8;}
+.left-meta{font-size:7.5px;color:#57534E;line-height:1.7;}
 
-    /* Fields */
-    .field { margin-bottom: 18px; }
-    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
-    .field input, .field textarea, .field select {
-      width: 100%; padding: 9px 13px; border: 1.5px solid #D6D3D1; border-radius: 8px;
-      font-family: Inter, sans-serif; font-size: 13px; background: #fff; outline: none;
-      transition: border-color 0.15s;
-    }
-    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--color-warm-slate); }
-    .field textarea { resize: vertical; min-height: 80px; }
-    .field .hint { font-size: 11px; color: #A8A29E; margin-top: 4px; }
+/* RIGHT */
+.right{flex:1;background:#FAFAF8;padding:1.6rem 1.5rem;display:flex;flex-direction:column;min-width:0;overflow-y:auto;}
 
-    /* Source-type buttons */
-    .source-btns { display: flex; gap: 10px; margin-bottom: 24px; }
-    .source-btn {
-      flex: 1; padding: 11px 8px; border: 1.5px solid #D6D3D1; border-radius: 9px;
-      background: #fff; font-family: Inter, sans-serif; font-size: 13px; font-weight: 600;
-      cursor: pointer; text-align: center; transition: border-color 0.15s, background 0.15s;
-    }
-    .source-btn .s-icon { display: block; font-size: 18px; margin-bottom: 4px; }
-    .source-btn.active { border-color: var(--color-warm-slate); background: var(--color-rule-ref-bg); }
+/* Session bar */
+.sess{background:#F5F0EB;border:0.5px solid #D6D3D1;border-radius:7px;padding:0.45rem 0.7rem;margin-bottom:1.3rem;cursor:pointer;}
+.sess-top{display:flex;align-items:center;gap:7px;}
+.sess-dot{width:5px;height:5px;border-radius:50%;background:#78716C;flex-shrink:0;}
+.sess-dot.has{background:#44403C;}
+.sess-txt{font-size:9.5px;color:#78716C;flex:1;}
+.sess-arr{font-size:9px;color:#A8A29E;}
+.sess-entries{display:none;padding-top:0.5rem;}
+.sess-entries.open{display:block;}
+.sess-row{display:flex;align-items:center;gap:6px;padding:3.5px 0;border-bottom:0.5px solid #E7E5E4;}
+.sess-row:last-child{border:none;}
+.sess-time{font-size:8.5px;color:#A8A29E;width:34px;flex-shrink:0;}
+.sess-proj{font-size:9px;color:#1C1917;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sess-badge{font-size:8px;font-weight:500;padding:2px 6px;border-radius:4px;flex-shrink:0;}
+.b-ap{background:#EAF3DE;color:#3B6D11;}
+.b-rv{background:#FAEEDA;color:#854F0B;}
+.b-rj{background:#FCEBEB;color:#A32D2D;}
 
-    /* Dynamic evidence sections */
-    .evidence-section { display: none; }
-    .evidence-section.active { display: block; }
+.eyebrow{font-size:9px;color:#78716C;text-transform:uppercase;letter-spacing:0.1em;font-weight:500;margin-bottom:0.3rem;}
+.heading{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:#1C1917;letter-spacing:-0.02em;margin-bottom:1.4rem;line-height:1.2;}
 
-    /* Conversation builder */
-    #conv-box { border: 1.5px solid #D6D3D1; border-radius: 10px; overflow: hidden; margin-bottom: 4px; }
-    .conv-turn { padding: 10px 13px; border-bottom: 1px solid var(--color-card-border); display: flex; gap: 10px; align-items: flex-start; }
-    .conv-turn:last-child { border-bottom: none; }
-    .conv-role {
-      font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-      padding: 3px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
-    }
-    .conv-role.user      { background: #E0EDF5; color: #3D6070; }
-    .conv-role.assistant { background: #E2E1F5; color: #4A4880; }
-    .conv-content { font-size: 13px; flex: 1; line-height: 1.5; }
-    .conv-del { background: none; border: none; cursor: pointer; color: #A8A29E; font-size: 15px; flex-shrink: 0; padding: 0 2px; }
-    .conv-del:hover { color: #A32D2D; }
-    .conv-empty { padding: 18px; color: #A8A29E; font-size: 13px; text-align: center; }
-    #conv-input-row { display: flex; gap: 8px; padding: 10px 13px; border-top: 1px solid var(--color-card-border); background: #FAFAF9; }
-    #conv-role-sel { padding: 7px 9px; border: 1.5px solid #D6D3D1; border-radius: 6px; font-size: 12px; }
-    #conv-text { flex: 1; padding: 7px 11px; border: 1.5px solid #D6D3D1; border-radius: 6px; font-size: 13px; }
-    #conv-add-btn {
-      padding: 7px 14px; background: var(--color-warm-slate); color: #fff; border: none;
-      border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
-    }
+.fl{margin-bottom:1rem;}
+.fl-lbl{font-size:8.5px;color:#78716C;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;display:flex;gap:4px;align-items:center;}
+.fl-req{color:#C2410C;}
+.fi{width:100%;background:transparent;border:none;border-bottom:1px solid #D6D3D1;padding:5px 0;font-size:13px;color:#1C1917;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.15s;}
+.fi::placeholder{color:#C8C0B8;}
+.fi:focus{border-bottom-color:#44403C;}
+.fi-hint{font-size:8.5px;color:#A8A29E;margin-top:3px;line-height:1.5;}
 
-    /* File upload */
-    .file-drop {
-      border: 2px dashed #D6D3D1; border-radius: 10px; padding: 32px 20px;
-      text-align: center; cursor: pointer; transition: border-color 0.15s;
-    }
-    .file-drop:hover { border-color: var(--color-warm-slate); }
-    .file-drop .fd-icon { font-size: 28px; margin-bottom: 8px; color: #A8A29E; }
-    .file-drop .fd-label { font-size: 13px; font-weight: 600; color: #44403C; }
-    .file-drop .fd-sub { font-size: 11px; color: #A8A29E; margin-top: 4px; }
-    #doc-file { display: none; }
-    #doc-preview { margin-top: 10px; font-size: 12px; color: #78716C; }
+.tab-row{display:flex;border-bottom:1px solid #D6D3D1;margin-bottom:0.65rem;}
+.tab{flex:1;font-size:10px;color:#A8A29E;padding:5px 3px;text-align:center;cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.tab.on{color:#1C1917;font-weight:500;border-bottom-color:#44403C;}
 
-    /* API key detection */
-    .api-key-wrap { position: relative; }
-    #api_key { padding-right: 120px; }
-    #provider-badge {
-      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-      font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px;
-      background: var(--color-rule-ref-bg); color: var(--color-warm-slate); display: none;
-    }
-    .no-key-hint { font-size: 11px; color: #A8A29E; margin-top: 6px; }
+.div-line{height:0.5px;background:#E7E5E4;margin:0.9rem 0;}
 
-    /* Review block */
-    .review-block {
-      background: var(--color-rule-ref-bg); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px;
-    }
-    .review-block h3 {
-      font-size: 11px; font-weight: 600; color: #78716C; text-transform: uppercase;
-      letter-spacing: 0.05em; margin-bottom: 8px;
-    }
-    .review-item { font-size: 13px; margin-bottom: 3px; color: #1C1917; }
-    .review-item span { font-weight: 600; }
+/* GitHub-specific fields */
+.gh-optional{font-size:8.5px;color:#A8A29E;margin-bottom:0.5rem;}
 
-    /* Navigation */
-    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
-    .btn-back {
-      padding: 9px 20px; border: 1.5px solid #D6D3D1; border-radius: 8px;
-      background: #fff; color: var(--color-warm-slate); font-size: 13px; font-weight: 600; cursor: pointer;
-    }
-    .btn-next {
-      padding: 9px 24px; background: var(--color-warm-slate); color: #fff; border: none;
-      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
-    }
-    .btn-next:hover { opacity: 0.85; }
-    .btn-submit {
-      padding: 11px 32px; background: #3B6D11; color: #fff; border: none;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
-    }
-    .btn-submit:hover { opacity: 0.85; }
+/* Conversation builder */
+.cv-turns{margin-bottom:0.6rem;}
+.cv-turn{display:flex;gap:6px;align-items:flex-start;margin-bottom:0.5rem;}
+.cv-role{font-size:9px;font-weight:500;color:#44403C;background:#F5F0EB;border:0.5px solid #D6D3D1;border-radius:5px;padding:4px 8px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
+.cv-role.assistant{background:#E0EDF5;color:#3D6070;border-color:#B8D4E2;}
+.cv-content{flex:1;border:none;border-bottom:1px solid #D6D3D1;background:transparent;font-family:'Inter',sans-serif;font-size:12px;color:#1C1917;outline:none;padding:4px 0;resize:none;min-height:32px;}
+.cv-content::placeholder{color:#C8C0B8;}
+.cv-content:focus{border-bottom-color:#44403C;}
+.cv-del{font-size:10px;color:#A8A29E;cursor:pointer;flex-shrink:0;padding:4px 2px;border:none;background:none;}
+.cv-del:hover{color:#A32D2D;}
+.cv-add{font-size:9px;color:#78716C;background:none;border:0.5px solid #D6D3D1;border-radius:5px;padding:4px 10px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.cv-add:hover{border-color:#44403C;color:#44403C;}
+.cv-hint{font-size:8.5px;color:#A8A29E;margin-top:4px;line-height:1.5;}
 
-    /* Loading overlay */
-    #loading-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(68,64,60,0.75);
-      z-index: 1000; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
-    }
-    #loading-overlay.show { display: flex; }
-    .spinner {
-      width: 38px; height: 38px; border: 3px solid rgba(255,255,255,0.3);
-      border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: #fff; font-size: 14px; font-weight: 600; }
+/* Document upload */
+.dc-drop{border:1px dashed #D6D3D1;border-radius:8px;padding:1.2rem;text-align:center;cursor:pointer;transition:all 0.15s;position:relative;}
+.dc-drop:hover,.dc-drop.over{border-color:#44403C;background:#F5F0EB;}
+.dc-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dc-icon{font-size:18px;margin-bottom:0.3rem;color:#A8A29E;}
+.dc-label{font-size:10px;color:#78716C;margin-bottom:2px;}
+.dc-sub{font-size:8.5px;color:#A8A29E;}
+.dc-name{font-size:9px;color:#44403C;font-weight:500;margin-top:0.4rem;}
 
-    /* Colorblind mode */
-    body.cb .btn-submit { background: #005C99; }
-    body.cb .source-btn.active { border-color: #005C99; }
-  </style>
+/* API key */
+.key-wrap{display:flex;align-items:center;gap:7px;}
+.key-fi{flex:1;background:transparent;border:none;border-bottom:1px solid #D6D3D1;padding:5px 0;font-size:11px;color:#1C1917;font-family:monospace;outline:none;}
+.key-fi:focus{border-bottom-color:#44403C;}
+.key-badge{font-size:8px;padding:2px 7px;border-radius:100px;background:#F5F0EB;color:#44403C;border:0.5px solid #D6D3D1;white-space:nowrap;}
+.no-key-hint{font-size:8.5px;color:#A8A29E;margin-top:3px;line-height:1.5;}
+
+/* Submit */
+.submit-area{margin-top:auto;padding-top:1rem;display:flex;align-items:center;gap:1rem;}
+.sbtn{background:#44403C;color:#FAFAF8;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;flex-shrink:0;transition:background 0.15s;}
+.sbtn:hover{background:#1C1917;}
+.sbtn:disabled{background:#E7E5E4;color:#A8A29E;cursor:not-allowed;}
+.sbtn.running{background:#57534E;}
+.s-hint{font-size:8.5px;color:#A8A29E;line-height:1.6;}
+.err-msg{font-size:9px;color:#A32D2D;margin-top:4px;display:none;}
+.err-msg.show{display:block;}
+
+/* Colorblind overrides */
+.cb .b-ap{background:#E6F1FB;color:#0C447C;}
+.cb .b-rj{background:#EEEDFE;color:#3C3489;}
+</style>
 </head>
 <body>
-  <div id="loading-overlay">
-    <div class="spinner"></div>
-    <div class="loading-text">Running SAFE evaluation…</div>
+<div class="w" id="root">
+
+  <!-- SIDEBAR -->
+  <div class="left">
+    <div class="logo">SAFE</div>
+    <div class="logo-sub">Safety Assurance<br>Framework for Evaluation</div>
+
+    <div class="steps" id="steps">
+      <div class="step active" data-step="1">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Name your target</div>
+          <div class="step-desc">Identify the AI system under evaluation</div>
+        </div>
+      </div>
+      <div class="step next" data-step="2">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Choose evidence type</div>
+          <div class="step-desc">GitHub &middot; conversation &middot; document</div>
+        </div>
+      </div>
+      <div class="step future" data-step="3">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Configure execution</div>
+          <div class="step-desc">Select mode and provide API key if needed</div>
+        </div>
+      </div>
+      <div class="step future" data-step="4">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Submit &amp; analyse</div>
+          <div class="step-desc">Three expert modules evaluate your evidence</div>
+        </div>
+      </div>
+      <div class="step future" data-step="5">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">Review verdict</div>
+          <div class="step-desc">APPROVE &middot; HOLD &middot; REJECT with citations</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-bottom">
+      <div class="cb-row">
+        <div class="cb-lbl" id="cb-lbl">Colour-blind mode</div>
+        <button class="toggle" id="cb-btn" onclick="toggleCB()"><div class="thumb"></div></button>
+      </div>
+      <div class="left-meta">UNICC AI Safety Lab<br>NYU MSMA Capstone SP26<br>Team 6 &middot; v1.2</div>
+    </div>
   </div>
 
-  <!-- Sidebar -->
-  <nav id="sidebar">
-    <div class="wordmark">SAFE <span>AI Safety Evaluation</span></div>
-    <div class="step-list">
-      <div class="step-item active" data-step="1"><div class="step-num">1</div><span>Target</span></div>
-      <div class="step-item"        data-step="2"><div class="step-num">2</div><span>Source Type</span></div>
-      <div class="step-item"        data-step="3"><div class="step-num">3</div><span>Evidence</span></div>
-      <div class="step-item"        data-step="4"><div class="step-num">4</div><span>API Key</span></div>
-      <div class="step-item"        data-step="5"><div class="step-num">5</div><span>Review &amp; Submit</span></div>
-    </div>
-    <div class="cb-toggle">
-      <label><input type="checkbox" id="cb-check" /> Colorblind mode</label>
-    </div>
-  </nav>
+  <!-- RIGHT PANEL -->
+  <div class="right">
 
-  <!-- Main -->
-  <main id="main">
-
-    <!-- Step 1: Target Name -->
-    <div class="step-panel active" id="panel-1">
-      <h1>Target Name</h1>
-      <p class="subtitle">Name the AI agent or system being evaluated.</p>
-      <div class="field">
-        <label for="target_name">Agent / System Name *</label>
-        <input type="text" id="target_name" placeholder="e.g. VeriMedia Content Moderator" autocomplete="off" />
-        <div class="hint">This name appears in the evaluation report and PDF cover.</div>
+    <!-- Session log -->
+    <div class="sess" id="sess-bar" onclick="toggleSess()">
+      <div class="sess-top">
+        <div class="sess-dot" id="sess-dot"></div>
+        <div class="sess-txt" id="sess-txt">Session log &middot; 0 evaluations this session</div>
+        <div class="sess-arr" id="sess-arr">&#9658;</div>
       </div>
-      <div class="nav-row">
-        <span></span>
-        <button class="btn-next" onclick="goTo(2)">Next →</button>
-      </div>
+      <div class="sess-entries" id="sess-entries"></div>
     </div>
 
-    <!-- Step 2: Source Type -->
-    <div class="step-panel" id="panel-2">
-      <h1>Source Type</h1>
-      <p class="subtitle">Select the type of evidence you are providing.</p>
-      <div class="source-btns">
-        <button class="source-btn active" data-source="github_url" onclick="selectSource(this)">
-          <span class="s-icon">⚙</span>GitHub URL
-        </button>
-        <button class="source-btn" data-source="conversation" onclick="selectSource(this)">
-          <span class="s-icon">💬</span>Conversation
-        </button>
-        <button class="source-btn" data-source="document" onclick="selectSource(this)">
-          <span class="s-icon">📄</span>Document
-        </button>
-      </div>
-      <div id="src-desc" style="font-size:13px;color:#78716C;background:#F9F8F6;border-radius:8px;padding:12px 14px;"></div>
-      <div class="nav-row">
-        <button class="btn-back" onclick="goTo(1)">← Back</button>
-        <button class="btn-next" onclick="goTo(3)">Next →</button>
-      </div>
+    <div class="eyebrow">New evaluation</div>
+    <div class="heading">What are you<br>evaluating?</div>
+
+    <!-- Step 1: Target name -->
+    <div class="fl">
+      <div class="fl-lbl">Project name <span class="fl-req">*</span></div>
+      <input class="fi" id="pname" placeholder="e.g. MedBot-v2, PolicyAI" oninput="onName()"/>
+      <div class="fi-hint">This name will appear on your report and session log.</div>
     </div>
 
-    <!-- Step 3: Evidence -->
-    <div class="step-panel" id="panel-3">
-      <h1>Evidence</h1>
-      <p class="subtitle" id="evidence-subtitle">Provide the evidence for evaluation.</p>
+    <!-- Step 2: Evidence type -->
+    <div class="fl">
+      <div class="fl-lbl">Evidence type <span class="fl-req">*</span></div>
+      <div class="tab-row">
+        <button class="tab on" id="tab-gh" onclick="swTab('gh',this)">GitHub URL</button>
+        <button class="tab" id="tab-cv" onclick="swTab('cv',this)">Conversation</button>
+        <button class="tab" id="tab-dc" onclick="swTab('dc',this)">Document</button>
+      </div>
 
-      <!-- GitHub URL evidence -->
-      <div class="evidence-section active" id="ev-github">
-        <div class="field">
-          <label for="github_url">GitHub URL *</label>
-          <input type="url" id="github_url" placeholder="https://github.com/owner/repository" />
+      <!-- GitHub fields -->
+      <div id="gh-fields">
+        <input class="fi" id="gh-url" placeholder="https://github.com/org/repo" oninput="onEvidence()"/>
+        <div class="fi-hint">Paste a public GitHub URL. Add a conversation record for stronger behavioral evidence.</div>
+        <div style="height:0.6rem;"></div>
+        <div class="gh-optional">Optional — leave blank to auto-detect</div>
+        <div class="fl" style="margin-bottom:0.6rem;">
+          <div class="fl-lbl">Framework</div>
+          <input class="fi" id="gh-framework" placeholder="e.g. Flask, FastAPI, Django"/>
         </div>
-        <div class="field">
-          <label for="framework">Framework <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
-          <input type="text" id="framework" placeholder="e.g. Flask, FastAPI, Django" />
+        <div class="fl" style="margin-bottom:0.6rem;">
+          <div class="fl-lbl">LLM backends</div>
+          <input class="fi" id="gh-llm" placeholder="e.g. gpt-4o, claude-3-haiku (comma-separated)"/>
         </div>
-        <div class="field">
-          <label for="llm_backends">LLM Backends <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
-          <input type="text" id="llm_backends" placeholder="e.g. OpenAI API, Gemini, Anthropic" />
+        <div class="fl" style="margin-bottom:0.6rem;">
+          <div class="fl-lbl">Auth signals</div>
+          <input class="fi" id="gh-auth" placeholder="e.g. no_explicit_auth, jwt_present"/>
         </div>
-        <div class="field">
-          <label for="auth_signals">Auth Signals <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
-          <input type="text" id="auth_signals" placeholder="e.g. JWT, OAuth, API key" />
-        </div>
-        <div class="field">
-          <label for="detected_signals">Detected Signals <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
-          <input type="text" id="detected_signals" placeholder="e.g. upload endpoint, external API calls" />
+        <div class="fl" style="margin-bottom:0;">
+          <div class="fl-lbl">Detected signals</div>
+          <input class="fi" id="gh-detected" placeholder="e.g. file_upload_surface, no_rate_limiting"/>
         </div>
       </div>
 
-      <!-- Conversation evidence -->
-      <div class="evidence-section" id="ev-conversation">
-        <div class="field">
-          <label>Conversation Transcript</label>
-          <div id="conv-box">
-            <div id="conv-turns"></div>
-            <div id="conv-input-row">
-              <select id="conv-role-sel">
-                <option value="user">User</option>
-                <option value="assistant">Assistant</option>
-              </select>
-              <input type="text" id="conv-text" placeholder="Enter message…" onkeydown="if(event.key==='Enter'){addTurn();event.preventDefault();}" />
-              <button id="conv-add-btn" onclick="addTurn()">Add</button>
-            </div>
-          </div>
-          <div class="hint">Press Enter or click Add to insert a turn. Minimum 1 turn required.</div>
-        </div>
+      <!-- Conversation builder -->
+      <div id="cv-fields" style="display:none;">
+        <div class="cv-hint" style="margin-bottom:0.5rem;">Build the conversation turn by turn. Click a role label to toggle user&nbsp;/&nbsp;assistant.</div>
+        <div class="cv-turns" id="cv-turns"></div>
+        <button class="cv-add" onclick="addTurn()">+ Add turn</button>
+        <div class="cv-hint" id="cv-count-hint" style="margin-top:4px;"></div>
       </div>
 
-      <!-- Document evidence -->
-      <div class="evidence-section" id="ev-document">
-        <div class="file-drop" onclick="document.getElementById('doc-file').click()" id="file-drop-zone">
-          <div class="fd-icon">📂</div>
-          <div class="fd-label">Click to select a file</div>
-          <div class="fd-sub">Supports .pdf, .md, .txt</div>
+      <!-- Document upload -->
+      <div id="dc-fields" style="display:none;">
+        <div class="dc-drop" id="dc-drop">
+          <input type="file" accept=".pdf,.md,.txt" onchange="onFileChange(event)" id="dc-file"/>
+          <div class="dc-icon">&#128196;</div>
+          <div class="dc-label">Drop a file or click to browse</div>
+          <div class="dc-sub">.pdf &middot; .md &middot; .txt accepted</div>
+          <div class="dc-name" id="dc-name" style="display:none;"></div>
         </div>
-        <input type="file" id="doc-file" accept=".pdf,.md,.txt,text/plain,text/markdown,application/pdf" />
-        <div id="doc-preview"></div>
-      </div>
-
-      <div class="nav-row">
-        <button class="btn-back" onclick="goTo(2)">← Back</button>
-        <button class="btn-next" onclick="goTo(4)">Next →</button>
+        <div class="fi-hint" style="margin-top:6px;">Document content will be passed to the expert council for governance and compliance evaluation.</div>
       </div>
     </div>
 
-    <!-- Step 4: API Key -->
-    <div class="step-panel" id="panel-4">
-      <h1>API Key</h1>
-      <p class="subtitle">Provide an LLM API key to enable full analysis. Leave blank for rules-only mode.</p>
-      <div class="field">
-        <label for="api_key">API Key</label>
-        <div class="api-key-wrap">
-          <input type="password" id="api_key" placeholder="sk-ant-… or sk-… or AIza…" autocomplete="off" oninput="detectProvider(this.value)" />
-          <span id="provider-badge"></span>
-        </div>
-        <div class="no-key-hint">No key? Rules-only mode will be used (limited accuracy).</div>
+    <div class="div-line"></div>
+
+    <!-- Step 3: API key -->
+    <div class="fl" id="key-grp">
+      <div class="fl-lbl">API key</div>
+      <div class="key-wrap">
+        <input class="key-fi" id="akey" placeholder="sk-ant-...  &middot;  sk-...  &middot;  AIza..." oninput="detKey(this.value);onKey()"/>
+        <div class="key-badge" id="kbadge">Auto-detect</div>
       </div>
-      <div class="nav-row">
-        <button class="btn-back" onclick="goTo(3)">← Back</button>
-        <button class="btn-next" onclick="goTo(5)">Next →</button>
+      <div class="no-key-hint" id="no-key-hint">No key? Rules-only mode will be used (limited accuracy)</div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-area">
+      <button class="sbtn" id="sbtn" disabled onclick="doSubmit()">Run evaluation &#8599;</button>
+      <div>
+        <div class="s-hint">Typically 20&ndash;60 sec<br>depending on mode</div>
+        <div class="err-msg" id="err-msg"></div>
       </div>
     </div>
 
-    <!-- Step 5: Review & Submit -->
-    <div class="step-panel" id="panel-5">
-      <h1>Review &amp; Submit</h1>
-      <p class="subtitle">Confirm your configuration before running the evaluation.</p>
-      <div class="review-block">
-        <h3>Target</h3>
-        <div class="review-item">Name: <span id="rv-name">—</span></div>
-      </div>
-      <div class="review-block">
-        <h3>Source</h3>
-        <div class="review-item">Type: <span id="rv-source">—</span></div>
-        <div id="rv-evidence-detail"></div>
-      </div>
-      <div class="review-block">
-        <h3>API Key</h3>
-        <div class="review-item">Provider: <span id="rv-provider">None (rules-only mode)</span></div>
-      </div>
-      <div class="nav-row">
-        <button class="btn-back" onclick="goTo(4)">← Back</button>
-        <button class="btn-submit" onclick="submitForm()">Run Evaluation</button>
-      </div>
-    </div>
+  </div><!-- /right -->
+</div><!-- /w -->
 
-  </main>
+<script>
+var cbOn=false, tab='gh', log=[];
+var filledName=false, filledEv=false;
+var conversationTurns=[];
+var docContent='', docFileName='';
 
-  <script>
-    let currentStep = 1;
-    let selectedSource = 'github_url';
-    const conversation = [];
-    let docContent = '';
-    let docFilename = '';
+function updateSteps(){
+  var steps=document.querySelectorAll('.step');
+  var hasKey=!!document.getElementById('akey').value.trim();
+  var cur=1;
+  if(filledName) cur=2;
+  if(filledName&&filledEv) cur=3;
+  if(filledName&&filledEv) cur=4;
+  steps.forEach(function(s){
+    var n=parseInt(s.dataset.step);
+    s.className='step';
+    if(n<cur) s.classList.add('done');
+    else if(n===cur) s.classList.add('active');
+    else if(n===cur+1) s.classList.add('next');
+    else s.classList.add('future');
+  });
+}
 
-    const SOURCE_DESC = {
-      github_url:   'Evaluate a public or private GitHub repository. The system will clone and analyze the code.',
-      conversation: 'Evaluate an AI agent from a conversation transcript. Add turns using the builder below.',
-      document:     'Upload a document (.pdf, .md, .txt) to use as evaluation evidence.',
-    };
+function onName(){filledName=!!document.getElementById('pname').value.trim();updateSteps();chk();}
 
-    // ── Step navigation ─────────────────────────────
-    function goTo(step) {
-      if (!validateStep(currentStep)) return;
-      document.querySelector('.step-panel.active').classList.remove('active');
-      document.getElementById('panel-' + step).classList.add('active');
-      document.querySelectorAll('.step-item').forEach(el => {
-        const s = parseInt(el.dataset.step);
-        el.classList.toggle('active', s === step);
-        el.classList.toggle('done', s < step);
-        if (s >= step) el.classList.remove('done');
-        if (s < step)  el.classList.add('done');
-      });
-      currentStep = step;
-      if (step === 3) syncEvidenceSection();
-      if (step === 5) buildReview();
+function onEvidence(){
+  if(tab==='gh') filledEv=!!document.getElementById('gh-url').value.trim();
+  updateSteps();chk();
+}
+
+function onKey(){updateSteps();chk();}
+
+function chk(){
+  var ok=filledName&&filledEv;
+  document.getElementById('sbtn').disabled=!ok;
+}
+
+function swTab(t,btn){
+  tab=t;
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  document.getElementById('gh-fields').style.display=t==='gh'?'block':'none';
+  document.getElementById('cv-fields').style.display=t==='cv'?'block':'none';
+  document.getElementById('dc-fields').style.display=t==='dc'?'block':'none';
+  // reset evidence state
+  if(t==='gh') filledEv=!!document.getElementById('gh-url').value.trim();
+  else if(t==='cv') filledEv=conversationTurns.length>0;
+  else if(t==='dc') filledEv=!!docContent;
+  updateSteps();chk();
+}
+
+function detKey(v){
+  var b=document.getElementById('kbadge');
+  var h=document.getElementById('no-key-hint');
+  if(!v){b.textContent='Auto-detect';h.style.display='';return;}
+  if(v.startsWith('sk-ant-')) b.textContent='Anthropic ✓';
+  else if(v.startsWith('sk-')) b.textContent='OpenAI ✓';
+  else if(v.startsWith('AIza')) b.textContent='Gemini ✓';
+  else if(v.length>8) b.textContent='Unknown provider';
+  else b.textContent='Auto-detect';
+  h.style.display='none';
+}
+
+/* Conversation builder */
+function addTurn(){
+  var role=conversationTurns.length%2===0?'user':'assistant';
+  conversationTurns.push({role:role,content:''});
+  renderTurns();
+  filledEv=false;updateSteps();chk();
+}
+
+function removeTurn(i){
+  conversationTurns.splice(i,1);
+  renderTurns();
+  filledEv=conversationTurns.some(function(t){return t.content.trim();});
+  updateSteps();chk();
+}
+
+function toggleRole(i){
+  conversationTurns[i].role=conversationTurns[i].role==='user'?'assistant':'user';
+  renderTurns();
+}
+
+function renderTurns(){
+  var c=document.getElementById('cv-turns');
+  if(!conversationTurns.length){
+    c.innerHTML='<div style="font-size:9px;color:#A8A29E;padding:4px 0;">No turns yet. Click &quot;+ Add turn&quot; to begin.</div>';
+    document.getElementById('cv-count-hint').textContent='';
+    return;
+  }
+  c.innerHTML=conversationTurns.map(function(t,i){
+    var roleClass=t.role==='assistant'?'cv-role assistant':'cv-role';
+    return '<div class="cv-turn">'
+      +'<button class="'+roleClass+'" onclick="toggleRole('+i+')">'+t.role+'</button>'
+      +'<textarea class="cv-content" rows="2" placeholder="Message content..." oninput="onTurnInput('+i+',this.value)">'+escHtml(t.content)+'</textarea>'
+      +'<button class="cv-del" onclick="removeTurn('+i+')" title="Remove turn">&times;</button>'
+      +'</div>';
+  }).join('');
+  var filled=conversationTurns.filter(function(t){return t.content.trim();}).length;
+  document.getElementById('cv-count-hint').textContent=conversationTurns.length+' turn'+(conversationTurns.length!==1?'s':'')+(filled<conversationTurns.length?' — fill all turns before submitting':'');
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function onTurnInput(i,v){
+  conversationTurns[i].content=v;
+  filledEv=conversationTurns.length>0&&conversationTurns.every(function(t){return t.content.trim();});
+  updateSteps();chk();
+  var filled=conversationTurns.filter(function(t){return t.content.trim();}).length;
+  document.getElementById('cv-count-hint').textContent=conversationTurns.length+' turn'+(conversationTurns.length!==1?'s':'')+(filled<conversationTurns.length?' — fill all turns before submitting':'');
+}
+
+/* Document upload */
+function onFileChange(e){
+  var file=e.target.files[0];
+  if(!file) return;
+  docFileName=file.name;
+  document.getElementById('dc-name').textContent='Selected: '+docFileName;
+  document.getElementById('dc-name').style.display='block';
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    docContent=ev.target.result;
+    filledEv=true;
+    updateSteps();chk();
+  };
+  if(file.name.endsWith('.pdf')){
+    // For PDF, we can't easily read text; treat as binary and send filename
+    docContent='[PDF document: '+docFileName+']';
+    filledEv=true;
+    updateSteps();chk();
+  } else {
+    reader.readAsText(file,'utf-8');
+  }
+}
+
+/* Color-blind mode */
+function toggleCB(){
+  cbOn=!cbOn;
+  document.getElementById('cb-btn').classList.toggle('on',cbOn);
+  document.getElementById('cb-lbl').classList.toggle('on',cbOn);
+  document.getElementById('root').classList.toggle('cb',cbOn);
+}
+
+/* Session log */
+function toggleSess(){
+  var e=document.getElementById('sess-entries');
+  e.classList.toggle('open');
+  document.getElementById('sess-arr').textContent=e.classList.contains('open')?'▾':'▸';
+}
+
+function renderLog(){
+  var e=document.getElementById('sess-entries');
+  if(!log.length){e.innerHTML='<div style="font-size:9px;color:#A8A29E;padding:4px 0">No evaluations yet.</div>';return;}
+  e.innerHTML=log.map(function(r){
+    var v=r.verdict;
+    var cls=v==='APPROVE'?'b-ap':v==='REJECT'?'b-rj':'b-rv';
+    var label=v==='REVIEW'?'HOLD':v;
+    return '<div class="sess-row"><span class="sess-time">'+r.time+'</span><span class="sess-proj">'+escHtml(r.name)+' &middot; '+r.type+'</span><span class="sess-badge '+cls+'">'+label+'</span></div>';
+  }).join('');
+}
+
+/* Form submit */
+async function doSubmit(){
+  var btn=document.getElementById('sbtn');
+  var errEl=document.getElementById('err-msg');
+  btn.disabled=true;
+  btn.classList.add('running');
+  btn.textContent='Running…';
+  errEl.classList.remove('show');
+
+  var targetName=document.getElementById('pname').value.trim();
+  var apiKey=document.getElementById('akey').value.trim();
+  var startTime=Date.now();
+
+  var evalMode=tab==='gh'?'repository_only':'behavior_only';
+
+  var body={
+    context:{agent_name:targetName,description:'',domain:'Other',capabilities:[],high_autonomy:false},
+    selected_policies:['eu_ai_act','us_nist','iso','unesco'],
+    conversation:[],
+    metadata:{},
+    evaluation_mode:evalMode
+  };
+
+  if(apiKey) body.metadata.api_key=apiKey;
+
+  if(tab==='gh'){
+    var ghUrl=document.getElementById('gh-url').value.trim();
+    body.submission={source_type:'github_url',github_url:ghUrl,target_name:targetName,description:''};
+    var fw=document.getElementById('gh-framework').value.trim();
+    var llmb=document.getElementById('gh-llm').value.trim();
+    var auth=document.getElementById('gh-auth').value.trim();
+    var det=document.getElementById('gh-detected').value.trim();
+    if(fw) body.metadata.framework=fw;
+    if(llmb) body.metadata.llm_backends=llmb;
+    if(auth) body.metadata.auth_signals=auth;
+    if(det) body.metadata.detected_signals=det;
+  } else if(tab==='cv'){
+    body.conversation=conversationTurns.map(function(t){return{role:t.role,content:t.content};});
+  } else if(tab==='dc'){
+    if(docContent) body.conversation=[{role:'user',content:docContent}];
+  }
+
+  try{
+    var resp=await fetch('/v1/evaluations',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!resp.ok){
+      var errBody=await resp.text();
+      throw new Error(resp.status+': '+errBody.slice(0,200));
     }
-
-    function validateStep(step) {
-      if (step === 1) {
-        const name = document.getElementById('target_name').value.trim();
-        if (!name) { document.getElementById('target_name').focus(); alert('Please enter a target name.'); return false; }
-      }
-      if (step === 3) {
-        if (selectedSource === 'github_url') {
-          const url = document.getElementById('github_url').value.trim();
-          if (!url) { document.getElementById('github_url').focus(); alert('Please enter a GitHub URL.'); return false; }
-        }
-        if (selectedSource === 'conversation' && conversation.length === 0) {
-          alert('Please add at least one conversation turn.'); return false;
-        }
-        if (selectedSource === 'document' && !docContent) {
-          alert('Please select a document file.'); return false;
-        }
-      }
-      return true;
+    var data=await resp.json();
+    var duration=Math.round((Date.now()-startTime)/1000);
+    data._duration_sec=duration;
+    data._input_label=tab==='gh'?'GitHub URL':tab==='cv'?'Conversation':'Document';
+    if(apiKey){
+      if(apiKey.startsWith('sk-ant-')) data._exec_mode='LLM API · Anthropic';
+      else if(apiKey.startsWith('sk-')) data._exec_mode='LLM API · OpenAI';
+      else if(apiKey.startsWith('AIza')) data._exec_mode='LLM API · Gemini';
+      else data._exec_mode='LLM API';
+    } else {
+      data._exec_mode='Rules only';
     }
+    sessionStorage.setItem('safe_result',JSON.stringify(data));
 
-    // ── Source type ──────────────────────────────────
-    function selectSource(btn) {
-      document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedSource = btn.dataset.source;
-      document.getElementById('src-desc').textContent = SOURCE_DESC[selectedSource];
-    }
+    var verdict=data.decision||'REVIEW';
+    var now=new Date();
+    var t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+    log.unshift({time:t,name:targetName,type:tab,verdict:verdict});
+    document.getElementById('sess-dot').classList.add('has');
+    document.getElementById('sess-txt').textContent='Session log · '+log.length+' evaluation'+(log.length!==1?'s':'')+' this session';
+    renderLog();
+    var e=document.getElementById('sess-entries');
+    e.classList.add('open');
+    document.getElementById('sess-arr').textContent='▾';
 
-    // Init source desc
-    document.getElementById('src-desc').textContent = SOURCE_DESC[selectedSource];
-
-    function syncEvidenceSection() {
-      document.querySelectorAll('.evidence-section').forEach(s => s.classList.remove('active'));
-      document.getElementById('ev-' + selectedSource)?.classList.add('active');
-      const subtitles = {
-        github_url:   'Enter the GitHub repository URL and optional metadata.',
-        conversation: 'Build the conversation transcript turn by turn.',
-        document:     'Upload a document to evaluate.',
-      };
-      document.getElementById('evidence-subtitle').textContent = subtitles[selectedSource] || '';
-    }
-
-    // ── Conversation builder ─────────────────────────
-    function addTurn() {
-      const role = document.getElementById('conv-role-sel').value;
-      const text = document.getElementById('conv-text').value.trim();
-      if (!text) return;
-      conversation.push({ role, content: text });
-      document.getElementById('conv-text').value = '';
-      renderConversation();
-    }
-
-    function removeTurn(i) {
-      conversation.splice(i, 1);
-      renderConversation();
-    }
-
-    function renderConversation() {
-      const box = document.getElementById('conv-turns');
-      if (!conversation.length) {
-        box.innerHTML = '<div class="conv-empty">No turns yet. Add a message below.</div>';
-        return;
-      }
-      box.innerHTML = conversation.map((t, i) =>
-        `<div class="conv-turn">
-          <span class="conv-role ${t.role}">${t.role}</span>
-          <span class="conv-content">${esc(t.content)}</span>
-          <button class="conv-del" onclick="removeTurn(${i})" title="Remove">×</button>
-        </div>`
-      ).join('');
-    }
-    renderConversation();
-
-    // ── Document upload ──────────────────────────────
-    document.getElementById('doc-file').addEventListener('change', async function() {
-      const file = this.files[0];
-      if (!file) return;
-      docFilename = file.name;
-      const preview = document.getElementById('doc-preview');
-      preview.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-      try {
-        if (file.type === 'application/pdf') {
-          docContent = `[PDF document: ${file.name}]`;
-        } else {
-          docContent = await file.text();
-        }
-        const drop = document.getElementById('file-drop-zone');
-        drop.querySelector('.fd-label').textContent = file.name;
-        drop.querySelector('.fd-sub').textContent = `${(file.size / 1024).toFixed(1)} KB · ready`;
-      } catch(e) {
-        preview.textContent = 'Error reading file.';
-      }
+    // Mark step 5 active before redirect
+    var steps=document.querySelectorAll('.step');
+    steps.forEach(function(s){
+      var n=parseInt(s.dataset.step);
+      s.className='step';
+      if(n<5) s.classList.add('done');
+      else s.classList.add('active');
     });
 
-    // ── API key detection ────────────────────────────
-    function detectProvider(val) {
-      const v = val.trim();
-      let provider = '';
-      if (v.startsWith('sk-ant-'))   provider = 'Anthropic';
-      else if (v.startsWith('sk-'))  provider = 'OpenAI';
-      else if (v.startsWith('AIza')) provider = 'Gemini';
-      else if (v.length > 0)         provider = 'Unknown provider';
-      const badge = document.getElementById('provider-badge');
-      badge.textContent = provider;
-      badge.style.display = provider ? 'inline-block' : 'none';
-    }
+    window.location.href='/result?id='+encodeURIComponent(data.evaluation_id);
+  } catch(err){
+    btn.disabled=false;
+    btn.classList.remove('running');
+    btn.textContent='Run evaluation ↗';
+    errEl.textContent='Error: '+err.message;
+    errEl.classList.add('show');
+  }
+}
 
-    // ── Review panel ─────────────────────────────────
-    function buildReview() {
-      document.getElementById('rv-name').textContent = document.getElementById('target_name').value.trim() || '—';
-
-      const sourceLabels = { github_url: 'GitHub URL', conversation: 'Conversation', document: 'Document' };
-      document.getElementById('rv-source').textContent = sourceLabels[selectedSource] || selectedSource;
-
-      let detail = '';
-      if (selectedSource === 'github_url') {
-        const url = document.getElementById('github_url').value.trim();
-        detail = `<div class="review-item">URL: <span>${esc(url || '(not set)')}</span></div>`;
-        const fw = document.getElementById('framework').value.trim();
-        if (fw) detail += `<div class="review-item">Framework: <span>${esc(fw)}</span></div>`;
-      } else if (selectedSource === 'conversation') {
-        detail = `<div class="review-item">Turns: <span>${conversation.length}</span></div>`;
-      } else if (selectedSource === 'document') {
-        detail = `<div class="review-item">File: <span>${esc(docFilename || '(none)')}</span></div>`;
-      }
-      document.getElementById('rv-evidence-detail').innerHTML = detail;
-
-      const apiKey = document.getElementById('api_key').value.trim();
-      let providerText = 'None (rules-only mode)';
-      if (apiKey.startsWith('sk-ant-')) providerText = 'Anthropic';
-      else if (apiKey.startsWith('sk-'))  providerText = 'OpenAI';
-      else if (apiKey.startsWith('AIza')) providerText = 'Gemini';
-      else if (apiKey)                    providerText = 'Unknown provider';
-      document.getElementById('rv-provider').textContent = providerText;
-    }
-
-    // ── Submit ───────────────────────────────────────
-    async function submitForm() {
-      const targetName = document.getElementById('target_name').value.trim() || 'Unnamed Agent';
-      const apiKey = document.getElementById('api_key').value.trim();
-
-      let evaluationMode, submission = null, convPayload = [];
-
-      if (selectedSource === 'github_url') {
-        evaluationMode = 'repository_only';
-        submission = {
-          source_type: 'github_url',
-          github_url: document.getElementById('github_url').value.trim(),
-          target_name: targetName,
-          description: '',
-        };
-      } else if (selectedSource === 'conversation') {
-        evaluationMode = 'behavior_only';
-        convPayload = conversation;
-      } else if (selectedSource === 'document') {
-        evaluationMode = 'behavior_only';
-        convPayload = docContent
-          ? [{ role: 'user', content: docContent.substring(0, 8000) }]
-          : [];
-      }
-
-      const metadata = {};
-      if (apiKey) metadata.api_key = apiKey;
-      const fw = document.getElementById('framework')?.value?.trim();
-      const llmb = document.getElementById('llm_backends')?.value?.trim();
-      const auth = document.getElementById('auth_signals')?.value?.trim();
-      const det  = document.getElementById('detected_signals')?.value?.trim();
-      if (fw)   metadata.framework        = fw;
-      if (llmb) metadata.llm_backends     = llmb;
-      if (auth) metadata.auth_signals     = auth;
-      if (det)  metadata.detected_signals = det;
-      if (selectedSource === 'document' && docFilename) metadata.document_filename = docFilename;
-
-      const body = {
-        evaluation_mode: evaluationMode,
-        context: { agent_name: targetName, domain: 'Other', capabilities: [], high_autonomy: false },
-        selected_policies: ['eu_ai_act', 'us_nist', 'iso', 'unesco'],
-        metadata,
-        conversation: convPayload,
-      };
-      if (submission) body.submission = submission;
-
-      document.getElementById('loading-overlay').classList.add('show');
-
-      try {
-        const resp = await fetch('/v1/evaluations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-        if (!resp.ok) {
-          const err = await resp.json().catch(() => ({}));
-          alert('Error ' + resp.status + ': ' + (err.detail || resp.statusText));
-          return;
-        }
-        const data = await resp.json();
-        sessionStorage.setItem('safe_result', JSON.stringify(data));
-        const id = data.evaluation_id || '';
-        window.location.href = '/result' + (id ? `?id=${encodeURIComponent(id)}` : '');
-      } catch(e) {
-        alert('Network error: ' + e.message);
-      } finally {
-        document.getElementById('loading-overlay').classList.remove('show');
-      }
-    }
-
-    // ── Colorblind mode ──────────────────────────────
-    document.getElementById('cb-check').addEventListener('change', function() {
-      document.body.classList.toggle('cb', this.checked);
-      sessionStorage.setItem('safe_cb', this.checked ? '1' : '0');
-    });
-    if (sessionStorage.getItem('safe_cb') === '1') {
-      document.body.classList.add('cb');
-      document.getElementById('cb-check').checked = true;
-    }
-
-    function esc(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-  </script>
+// Initialize
+renderTurns();
+</script>
 </body>
 </html>

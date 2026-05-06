@@ -1,1 +1,15 @@
-/* SAFE — supplemental overrides (most styles are inline in templates) */
+/* SAFE — design system variables (shared by index.html and result.html) */
+:root {
+  --color-warm-slate:      #44403C;
+  --color-rule-ref-bg:     #F5F0EB;
+  --color-rule-ref-border: #44403C;
+  --color-divider:         #E0E0E0;
+  --color-card-border:     #E7E5E4;
+
+  --color-high-bg:     #FCEBEB;  --color-high-text:   #A32D2D;
+  --color-med-bg:      #FAEEDA;  --color-med-text:    #854F0B;
+  --color-low-bg:      #EAF3DE;  --color-low-text:    #3B6D11;
+
+  --color-core-bg:     #F0EDE9;  --color-core-text:   #78716C;
+  --color-weak-border: #FAC775;  --color-weak-bg:     #FAEEDA;
+}

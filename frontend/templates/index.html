@@ -6,141 +6,169 @@
   <title>SAFE — AI Safety Evaluation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Inter, sans-serif; background: #F9F8F6; color: #1C1917; min-height: 100vh; display: flex; }
 
-    /* Sidebar */
+    /* ── Sidebar ─────────────────────────────────────── */
     #sidebar {
-      width: 260px; min-height: 100vh; background: #44403C; color: #fff;
-      padding: 32px 24px; display: flex; flex-direction: column; gap: 32px; flex-shrink: 0;
+      width: 200px; min-height: 100vh; background: var(--color-warm-slate); color: #fff;
+      padding: 28px 20px; display: flex; flex-direction: column; gap: 28px; flex-shrink: 0;
     }
-    .wordmark { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
-    .wordmark span { opacity: 0.6; font-size: 11px; display: block; font-family: Inter, sans-serif; font-weight: 400; margin-top: 4px; }
-    .step-list { display: flex; flex-direction: column; gap: 12px; }
+    .wordmark {
+      font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
+    }
+    .wordmark span {
+      display: block; font-family: Inter, sans-serif; font-size: 10px; font-weight: 400;
+      opacity: 0.55; margin-top: 3px; letter-spacing: 0;
+    }
+    .step-list { display: flex; flex-direction: column; gap: 6px; }
     .step-item {
-      display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px;
-      cursor: pointer; transition: background 0.15s; font-size: 13px; font-weight: 600; opacity: 0.55;
+      display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 7px;
+      cursor: pointer; font-size: 12px; font-weight: 600; opacity: 0.45; transition: opacity 0.15s, background 0.15s;
     }
-    .step-item.active { background: rgba(255,255,255,0.12); opacity: 1; }
-    .step-item.done { opacity: 0.75; }
+    .step-item.active  { background: rgba(255,255,255,0.12); opacity: 1; }
+    .step-item.done    { opacity: 0.7; }
     .step-num {
-      width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.4);
-      display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0;
+      width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.35);
+      display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0;
     }
-    .step-item.done .step-num { background: rgba(255,255,255,0.2); border-color: transparent; }
-    .step-item.active .step-num { background: #fff; color: #44403C; border-color: #fff; }
+    .step-item.active .step-num { background: #fff; color: var(--color-warm-slate); border-color: #fff; }
+    .step-item.done   .step-num { background: rgba(255,255,255,0.18); border-color: transparent; }
 
     /* Colorblind toggle */
     .cb-toggle { margin-top: auto; }
-    .cb-toggle label { display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer; }
+    .cb-toggle label { display: flex; align-items: center; gap: 9px; font-size: 11px; cursor: pointer; opacity: 0.7; }
     .cb-toggle input { width: 14px; height: 14px; accent-color: #fff; }
 
-    /* Main content */
-    #main { flex: 1; padding: 48px 56px; max-width: 800px; }
-    h1 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 8px; }
-    .subtitle { color: #78716C; font-size: 14px; margin-bottom: 40px; }
+    /* ── Main area ──────────────────────────────────── */
+    #main { flex: 1; padding: 44px 52px; max-width: 760px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 6px; }
+    .subtitle { color: #78716C; font-size: 13px; margin-bottom: 36px; }
 
     /* Step panels */
     .step-panel { display: none; }
     .step-panel.active { display: block; }
 
-    /* Form fields */
-    .field { margin-bottom: 20px; }
-    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    /* Fields */
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
     .field input, .field textarea, .field select {
-      width: 100%; padding: 10px 14px; border: 1.5px solid #D6D3D1; border-radius: 8px;
-      font-family: Inter, sans-serif; font-size: 14px; background: #fff;
-      transition: border-color 0.15s; outline: none;
+      width: 100%; padding: 9px 13px; border: 1.5px solid #D6D3D1; border-radius: 8px;
+      font-family: Inter, sans-serif; font-size: 13px; background: #fff; outline: none;
+      transition: border-color 0.15s;
     }
-    .field input:focus, .field textarea:focus, .field select:focus { border-color: #44403C; }
-    .field textarea { resize: vertical; min-height: 90px; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--color-warm-slate); }
+    .field textarea { resize: vertical; min-height: 80px; }
     .field .hint { font-size: 11px; color: #A8A29E; margin-top: 4px; }
 
-    /* Radio group */
-    .radio-group { display: flex; flex-direction: column; gap: 10px; }
-    .radio-option {
-      display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1.5px solid #D6D3D1;
-      border-radius: 10px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    /* Source-type buttons */
+    .source-btns { display: flex; gap: 10px; margin-bottom: 24px; }
+    .source-btn {
+      flex: 1; padding: 11px 8px; border: 1.5px solid #D6D3D1; border-radius: 9px;
+      background: #fff; font-family: Inter, sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-align: center; transition: border-color 0.15s, background 0.15s;
     }
-    .radio-option:has(input:checked) { border-color: #44403C; background: #F5F0EB; }
-    .radio-option input[type=radio] { margin-top: 3px; accent-color: #44403C; }
-    .radio-option .opt-label { font-size: 13px; font-weight: 600; }
-    .radio-option .opt-desc { font-size: 12px; color: #78716C; margin-top: 2px; }
+    .source-btn .s-icon { display: block; font-size: 18px; margin-bottom: 4px; }
+    .source-btn.active { border-color: var(--color-warm-slate); background: var(--color-rule-ref-bg); }
 
-    /* Policy checkboxes */
-    .policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .policy-chip {
-      display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1.5px solid #D6D3D1;
-      border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .policy-chip:has(input:checked) { border-color: #44403C; background: #F5F0EB; }
-    .policy-chip input[type=checkbox] { accent-color: #44403C; }
+    /* Dynamic evidence sections */
+    .evidence-section { display: none; }
+    .evidence-section.active { display: block; }
 
     /* Conversation builder */
-    #conversation-box { border: 1.5px solid #D6D3D1; border-radius: 10px; overflow: hidden; }
-    .conv-turn { padding: 12px 14px; border-bottom: 1px solid #E7E5E4; display: flex; gap: 10px; }
+    #conv-box { border: 1.5px solid #D6D3D1; border-radius: 10px; overflow: hidden; margin-bottom: 4px; }
+    .conv-turn { padding: 10px 13px; border-bottom: 1px solid var(--color-card-border); display: flex; gap: 10px; align-items: flex-start; }
     .conv-turn:last-child { border-bottom: none; }
     .conv-role {
-      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-      padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; height: fit-content;
+      font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 3px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
     }
-    .conv-role.user { background: #E0EDF5; color: #3D6070; }
+    .conv-role.user      { background: #E0EDF5; color: #3D6070; }
     .conv-role.assistant { background: #E2E1F5; color: #4A4880; }
     .conv-content { font-size: 13px; flex: 1; line-height: 1.5; }
-    .conv-del { background: none; border: none; cursor: pointer; color: #A8A29E; font-size: 16px; flex-shrink: 0; }
+    .conv-del { background: none; border: none; cursor: pointer; color: #A8A29E; font-size: 15px; flex-shrink: 0; padding: 0 2px; }
     .conv-del:hover { color: #A32D2D; }
-    #conv-input-row { display: flex; gap: 10px; padding: 12px 14px; border-top: 1px solid #E7E5E4; background: #FAFAF9; }
-    #conv-role-sel { padding: 8px 10px; border: 1.5px solid #D6D3D1; border-radius: 6px; font-size: 13px; }
-    #conv-text { flex: 1; padding: 8px 12px; border: 1.5px solid #D6D3D1; border-radius: 6px; font-size: 13px; }
+    .conv-empty { padding: 18px; color: #A8A29E; font-size: 13px; text-align: center; }
+    #conv-input-row { display: flex; gap: 8px; padding: 10px 13px; border-top: 1px solid var(--color-card-border); background: #FAFAF9; }
+    #conv-role-sel { padding: 7px 9px; border: 1.5px solid #D6D3D1; border-radius: 6px; font-size: 12px; }
+    #conv-text { flex: 1; padding: 7px 11px; border: 1.5px solid #D6D3D1; border-radius: 6px; font-size: 13px; }
     #conv-add-btn {
-      padding: 8px 16px; background: #44403C; color: #fff; border: none; border-radius: 6px;
-      font-size: 13px; cursor: pointer; font-weight: 600;
+      padding: 7px 14px; background: var(--color-warm-slate); color: #fff; border: none;
+      border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
     }
-    .conv-empty { padding: 20px; color: #A8A29E; font-size: 13px; text-align: center; }
 
-    /* Dynamic section */
-    .dynamic-section { transition: opacity 0.2s; }
-    .dynamic-section.hidden { display: none; }
-
-    /* Navigation buttons */
-    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; }
-    .btn-back {
-      padding: 10px 22px; border: 1.5px solid #D6D3D1; border-radius: 8px;
-      background: #fff; color: #44403C; font-size: 14px; font-weight: 600; cursor: pointer;
+    /* File upload */
+    .file-drop {
+      border: 2px dashed #D6D3D1; border-radius: 10px; padding: 32px 20px;
+      text-align: center; cursor: pointer; transition: border-color 0.15s;
     }
-    .btn-next, .btn-submit {
-      padding: 10px 28px; background: #44403C; color: #fff; border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
-    }
-    .btn-next:hover, .btn-submit:hover { opacity: 0.85; }
-    .btn-submit { background: #3B6D11; padding: 12px 36px; font-size: 15px; }
+    .file-drop:hover { border-color: var(--color-warm-slate); }
+    .file-drop .fd-icon { font-size: 28px; margin-bottom: 8px; color: #A8A29E; }
+    .file-drop .fd-label { font-size: 13px; font-weight: 600; color: #44403C; }
+    .file-drop .fd-sub { font-size: 11px; color: #A8A29E; margin-top: 4px; }
+    #doc-file { display: none; }
+    #doc-preview { margin-top: 10px; font-size: 12px; color: #78716C; }
 
-    /* Review section */
-    .review-block { background: #F5F0EB; border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
-    .review-block h3 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #78716C; text-transform: uppercase; letter-spacing: 0.05em; }
-    .review-item { font-size: 14px; margin-bottom: 4px; }
+    /* API key detection */
+    .api-key-wrap { position: relative; }
+    #api_key { padding-right: 120px; }
+    #provider-badge {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px;
+      background: var(--color-rule-ref-bg); color: var(--color-warm-slate); display: none;
+    }
+    .no-key-hint { font-size: 11px; color: #A8A29E; margin-top: 6px; }
+
+    /* Review block */
+    .review-block {
+      background: var(--color-rule-ref-bg); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px;
+    }
+    .review-block h3 {
+      font-size: 11px; font-weight: 600; color: #78716C; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 8px;
+    }
+    .review-item { font-size: 13px; margin-bottom: 3px; color: #1C1917; }
     .review-item span { font-weight: 600; }
+
+    /* Navigation */
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+    .btn-back {
+      padding: 9px 20px; border: 1.5px solid #D6D3D1; border-radius: 8px;
+      background: #fff; color: var(--color-warm-slate); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-next {
+      padding: 9px 24px; background: var(--color-warm-slate); color: #fff; border: none;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-next:hover { opacity: 0.85; }
+    .btn-submit {
+      padding: 11px 32px; background: #3B6D11; color: #fff; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-submit:hover { opacity: 0.85; }
 
     /* Loading overlay */
     #loading-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(68,64,60,0.7);
-      z-index: 1000; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+      display: none; position: fixed; inset: 0; background: rgba(68,64,60,0.75);
+      z-index: 1000; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
     }
     #loading-overlay.show { display: flex; }
-    .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .spinner {
+      width: 38px; height: 38px; border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: #fff; font-size: 15px; font-weight: 600; }
+    .loading-text { color: #fff; font-size: 14px; font-weight: 600; }
 
     /* Colorblind mode */
     body.cb .btn-submit { background: #005C99; }
-    body.cb .step-item.active .step-num { color: #005C99; }
+    body.cb .source-btn.active { border-color: #005C99; }
   </style>
 </head>
 <body>
-  <!-- Loading overlay -->
   <div id="loading-overlay">
     <div class="spinner"></div>
     <div class="loading-text">Running SAFE evaluation…</div>
@@ -150,21 +178,11 @@
   <nav id="sidebar">
     <div class="wordmark">SAFE <span>AI Safety Evaluation</span></div>
     <div class="step-list">
-      <div class="step-item active" data-step="1">
-        <div class="step-num">1</div><span>Evaluation Mode</span>
-      </div>
-      <div class="step-item" data-step="2">
-        <div class="step-num">2</div><span>Agent Context</span>
-      </div>
-      <div class="step-item" data-step="3">
-        <div class="step-num">3</div><span>Policy Frameworks</span>
-      </div>
-      <div class="step-item" data-step="4">
-        <div class="step-num">4</div><span>Evidence</span>
-      </div>
-      <div class="step-item" data-step="5">
-        <div class="step-num">5</div><span>Review &amp; Submit</span>
-      </div>
+      <div class="step-item active" data-step="1"><div class="step-num">1</div><span>Target</span></div>
+      <div class="step-item"        data-step="2"><div class="step-num">2</div><span>Source Type</span></div>
+      <div class="step-item"        data-step="3"><div class="step-num">3</div><span>Evidence</span></div>
+      <div class="step-item"        data-step="4"><div class="step-num">4</div><span>API Key</span></div>
+      <div class="step-item"        data-step="5"><div class="step-num">5</div><span>Review &amp; Submit</span></div>
     </div>
     <div class="cb-toggle">
       <label><input type="checkbox" id="cb-check" /> Colorblind mode</label>
@@ -173,138 +191,124 @@
 
   <!-- Main -->
   <main id="main">
-    <!-- Step 1: Evaluation Mode -->
+
+    <!-- Step 1: Target Name -->
     <div class="step-panel active" id="panel-1">
-      <h1>Evaluation Mode</h1>
-      <p class="subtitle">Choose how you want to evaluate your AI agent.</p>
-      <div class="radio-group">
-        <label class="radio-option">
-          <input type="radio" name="eval_mode" value="behavior_only" checked />
-          <div>
-            <div class="opt-label">Behavior Only</div>
-            <div class="opt-desc">Evaluate from conversation transcripts. No code repository needed.</div>
-          </div>
-        </label>
-        <label class="radio-option">
-          <input type="radio" name="eval_mode" value="repository_only" />
-          <div>
-            <div class="opt-label">Repository Only</div>
-            <div class="opt-desc">Evaluate from a GitHub URL or local path. No transcript needed.</div>
-          </div>
-        </label>
-        <label class="radio-option">
-          <input type="radio" name="eval_mode" value="hybrid" />
-          <div>
-            <div class="opt-label">Hybrid</div>
-            <div class="opt-desc">Combine repository code analysis with conversation transcript evidence.</div>
-          </div>
-        </label>
+      <h1>Target Name</h1>
+      <p class="subtitle">Name the AI agent or system being evaluated.</p>
+      <div class="field">
+        <label for="target_name">Agent / System Name *</label>
+        <input type="text" id="target_name" placeholder="e.g. VeriMedia Content Moderator" autocomplete="off" />
+        <div class="hint">This name appears in the evaluation report and PDF cover.</div>
       </div>
       <div class="nav-row">
         <span></span>
-        <button class="btn-next" onclick="goTo(2)">Next</button>
+        <button class="btn-next" onclick="goTo(2)">Next →</button>
       </div>
     </div>
 
-    <!-- Step 2: Agent Context -->
+    <!-- Step 2: Source Type -->
     <div class="step-panel" id="panel-2">
-      <h1>Agent Context</h1>
-      <p class="subtitle">Describe the agent being evaluated.</p>
-      <div class="field">
-        <label>Agent Name *</label>
-        <input type="text" id="agent_name" placeholder="e.g. VeriMedia Content Moderator" />
+      <h1>Source Type</h1>
+      <p class="subtitle">Select the type of evidence you are providing.</p>
+      <div class="source-btns">
+        <button class="source-btn active" data-source="github_url" onclick="selectSource(this)">
+          <span class="s-icon">⚙</span>GitHub URL
+        </button>
+        <button class="source-btn" data-source="conversation" onclick="selectSource(this)">
+          <span class="s-icon">💬</span>Conversation
+        </button>
+        <button class="source-btn" data-source="document" onclick="selectSource(this)">
+          <span class="s-icon">📄</span>Document
+        </button>
       </div>
-      <div class="field">
-        <label>Description</label>
-        <textarea id="description" placeholder="Brief description of the agent's purpose and deployment context…"></textarea>
-      </div>
-      <div class="field">
-        <label>Domain</label>
-        <select id="domain">
-          <option value="Other">Other</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Finance">Finance</option>
-          <option value="Legal">Legal</option>
-          <option value="Education">Education</option>
-          <option value="Security">Security</option>
-          <option value="Government">Government</option>
-        </select>
-      </div>
-      <div class="field">
-        <label><input type="checkbox" id="high_autonomy" style="margin-right:8px;accent-color:#44403C;" /> High-autonomy agent (can act without human confirmation)</label>
-      </div>
+      <div id="src-desc" style="font-size:13px;color:#78716C;background:#F9F8F6;border-radius:8px;padding:12px 14px;"></div>
       <div class="nav-row">
-        <button class="btn-back" onclick="goTo(1)">Back</button>
-        <button class="btn-next" onclick="goTo(3)">Next</button>
+        <button class="btn-back" onclick="goTo(1)">← Back</button>
+        <button class="btn-next" onclick="goTo(3)">Next →</button>
       </div>
     </div>
 
-    <!-- Step 3: Policy Frameworks -->
+    <!-- Step 3: Evidence -->
     <div class="step-panel" id="panel-3">
-      <h1>Policy Frameworks</h1>
-      <p class="subtitle">Select the regulatory frameworks to evaluate against.</p>
-      <div class="policy-grid">
-        <label class="policy-chip"><input type="checkbox" name="policy" value="eu_ai_act" checked /> EU AI Act 2024</label>
-        <label class="policy-chip"><input type="checkbox" name="policy" value="us_nist" checked /> NIST AI RMF 1.0</label>
-        <label class="policy-chip"><input type="checkbox" name="policy" value="iso" checked /> ISO/IEC 42001</label>
-        <label class="policy-chip"><input type="checkbox" name="policy" value="unesco" checked /> UNESCO AI Ethics</label>
-      </div>
-      <div class="nav-row">
-        <button class="btn-back" onclick="goTo(2)">Back</button>
-        <button class="btn-next" onclick="goTo(4)">Next</button>
-      </div>
-    </div>
-
-    <!-- Step 4: Evidence -->
-    <div class="step-panel" id="panel-4">
       <h1>Evidence</h1>
-      <p class="subtitle">Provide the evidence for evaluation based on your chosen mode.</p>
+      <p class="subtitle" id="evidence-subtitle">Provide the evidence for evaluation.</p>
 
-      <!-- Repository section (shown for repository_only / hybrid) -->
-      <div class="dynamic-section hidden" id="repo-section">
+      <!-- GitHub URL evidence -->
+      <div class="evidence-section active" id="ev-github">
         <div class="field">
-          <label>Source Type</label>
-          <select id="source_type">
-            <option value="github_url">GitHub URL</option>
-            <option value="local_path">Local Path</option>
-          </select>
-        </div>
-        <div class="field" id="github-url-field">
-          <label>GitHub URL *</label>
-          <input type="text" id="github_url" placeholder="https://github.com/owner/repository" />
-        </div>
-        <div class="field hidden" id="local-path-field">
-          <label>Local Path *</label>
-          <input type="text" id="local_path" placeholder="/absolute/path/to/repository" />
+          <label for="github_url">GitHub URL *</label>
+          <input type="url" id="github_url" placeholder="https://github.com/owner/repository" />
         </div>
         <div class="field">
-          <label>Repository Description</label>
-          <input type="text" id="repo_description" placeholder="Brief description of the repository…" />
+          <label for="framework">Framework <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
+          <input type="text" id="framework" placeholder="e.g. Flask, FastAPI, Django" />
+        </div>
+        <div class="field">
+          <label for="llm_backends">LLM Backends <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
+          <input type="text" id="llm_backends" placeholder="e.g. OpenAI API, Gemini, Anthropic" />
+        </div>
+        <div class="field">
+          <label for="auth_signals">Auth Signals <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
+          <input type="text" id="auth_signals" placeholder="e.g. JWT, OAuth, API key" />
+        </div>
+        <div class="field">
+          <label for="detected_signals">Detected Signals <span style="font-weight:400;color:#A8A29E">(optional)</span></label>
+          <input type="text" id="detected_signals" placeholder="e.g. upload endpoint, external API calls" />
         </div>
       </div>
 
-      <!-- Conversation section (shown for behavior_only / hybrid) -->
-      <div class="dynamic-section" id="conv-section">
+      <!-- Conversation evidence -->
+      <div class="evidence-section" id="ev-conversation">
         <div class="field">
           <label>Conversation Transcript</label>
-          <div id="conversation-box">
+          <div id="conv-box">
             <div id="conv-turns"></div>
             <div id="conv-input-row">
               <select id="conv-role-sel">
                 <option value="user">User</option>
                 <option value="assistant">Assistant</option>
               </select>
-              <input type="text" id="conv-text" placeholder="Enter message…" onkeydown="if(event.key==='Enter'){addTurn();}" />
+              <input type="text" id="conv-text" placeholder="Enter message…" onkeydown="if(event.key==='Enter'){addTurn();event.preventDefault();}" />
               <button id="conv-add-btn" onclick="addTurn()">Add</button>
             </div>
           </div>
-          <div class="hint">Press Enter or click Add to insert a turn.</div>
+          <div class="hint">Press Enter or click Add to insert a turn. Minimum 1 turn required.</div>
         </div>
       </div>
 
+      <!-- Document evidence -->
+      <div class="evidence-section" id="ev-document">
+        <div class="file-drop" onclick="document.getElementById('doc-file').click()" id="file-drop-zone">
+          <div class="fd-icon">📂</div>
+          <div class="fd-label">Click to select a file</div>
+          <div class="fd-sub">Supports .pdf, .md, .txt</div>
+        </div>
+        <input type="file" id="doc-file" accept=".pdf,.md,.txt,text/plain,text/markdown,application/pdf" />
+        <div id="doc-preview"></div>
+      </div>
+
       <div class="nav-row">
-        <button class="btn-back" onclick="goTo(3)">Back</button>
-        <button class="btn-next" onclick="goTo(5)">Next</button>
+        <button class="btn-back" onclick="goTo(2)">← Back</button>
+        <button class="btn-next" onclick="goTo(4)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: API Key -->
+    <div class="step-panel" id="panel-4">
+      <h1>API Key</h1>
+      <p class="subtitle">Provide an LLM API key to enable full analysis. Leave blank for rules-only mode.</p>
+      <div class="field">
+        <label for="api_key">API Key</label>
+        <div class="api-key-wrap">
+          <input type="password" id="api_key" placeholder="sk-ant-… or sk-… or AIza…" autocomplete="off" oninput="detectProvider(this.value)" />
+          <span id="provider-badge"></span>
+        </div>
+        <div class="no-key-hint">No key? Rules-only mode will be used (limited accuracy).</div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goTo(3)">← Back</button>
+        <button class="btn-next" onclick="goTo(5)">Next →</button>
       </div>
     </div>
 
@@ -312,28 +316,21 @@
     <div class="step-panel" id="panel-5">
       <h1>Review &amp; Submit</h1>
       <p class="subtitle">Confirm your configuration before running the evaluation.</p>
-
       <div class="review-block">
-        <h3>Evaluation</h3>
-        <div class="review-item">Mode: <span id="rv-mode">—</span></div>
-      </div>
-      <div class="review-block">
-        <h3>Agent</h3>
+        <h3>Target</h3>
         <div class="review-item">Name: <span id="rv-name">—</span></div>
-        <div class="review-item">Domain: <span id="rv-domain">—</span></div>
-        <div class="review-item">High autonomy: <span id="rv-autonomy">—</span></div>
       </div>
       <div class="review-block">
-        <h3>Policies</h3>
-        <div class="review-item"><span id="rv-policies">—</span></div>
+        <h3>Source</h3>
+        <div class="review-item">Type: <span id="rv-source">—</span></div>
+        <div id="rv-evidence-detail"></div>
       </div>
-      <div class="review-block" id="rv-evidence-block">
-        <h3>Evidence</h3>
-        <div id="rv-evidence">—</div>
+      <div class="review-block">
+        <h3>API Key</h3>
+        <div class="review-item">Provider: <span id="rv-provider">None (rules-only mode)</span></div>
       </div>
-
       <div class="nav-row">
-        <button class="btn-back" onclick="goTo(4)">Back</button>
+        <button class="btn-back" onclick="goTo(4)">← Back</button>
         <button class="btn-submit" onclick="submitForm()">Run Evaluation</button>
       </div>
     </div>
@@ -342,46 +339,77 @@
 
   <script>
     let currentStep = 1;
+    let selectedSource = 'github_url';
     const conversation = [];
+    let docContent = '';
+    let docFilename = '';
 
-    // --- Step navigation ---
+    const SOURCE_DESC = {
+      github_url:   'Evaluate a public or private GitHub repository. The system will clone and analyze the code.',
+      conversation: 'Evaluate an AI agent from a conversation transcript. Add turns using the builder below.',
+      document:     'Upload a document (.pdf, .md, .txt) to use as evaluation evidence.',
+    };
+
+    // ── Step navigation ─────────────────────────────
     function goTo(step) {
+      if (!validateStep(currentStep)) return;
       document.querySelector('.step-panel.active').classList.remove('active');
       document.getElementById('panel-' + step).classList.add('active');
-
       document.querySelectorAll('.step-item').forEach(el => {
         const s = parseInt(el.dataset.step);
-        el.classList.remove('active', 'done');
-        if (s === step) el.classList.add('active');
-        else if (s < step) el.classList.add('done');
+        el.classList.toggle('active', s === step);
+        el.classList.toggle('done', s < step);
+        if (s >= step) el.classList.remove('done');
+        if (s < step)  el.classList.add('done');
       });
-
       currentStep = step;
-      if (step === 4) updateEvidenceSections();
+      if (step === 3) syncEvidenceSection();
       if (step === 5) buildReview();
     }
 
-    // --- Evaluation mode drives evidence sections ---
-    function getMode() {
-      return document.querySelector('input[name="eval_mode"]:checked')?.value || 'behavior_only';
+    function validateStep(step) {
+      if (step === 1) {
+        const name = document.getElementById('target_name').value.trim();
+        if (!name) { document.getElementById('target_name').focus(); alert('Please enter a target name.'); return false; }
+      }
+      if (step === 3) {
+        if (selectedSource === 'github_url') {
+          const url = document.getElementById('github_url').value.trim();
+          if (!url) { document.getElementById('github_url').focus(); alert('Please enter a GitHub URL.'); return false; }
+        }
+        if (selectedSource === 'conversation' && conversation.length === 0) {
+          alert('Please add at least one conversation turn.'); return false;
+        }
+        if (selectedSource === 'document' && !docContent) {
+          alert('Please select a document file.'); return false;
+        }
+      }
+      return true;
     }
 
-    function updateEvidenceSections() {
-      const mode = getMode();
-      const showRepo = mode === 'repository_only' || mode === 'hybrid';
-      const showConv = mode === 'behavior_only' || mode === 'hybrid';
-      document.getElementById('repo-section').classList.toggle('hidden', !showRepo);
-      document.getElementById('conv-section').classList.toggle('hidden', !showConv);
+    // ── Source type ──────────────────────────────────
+    function selectSource(btn) {
+      document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedSource = btn.dataset.source;
+      document.getElementById('src-desc').textContent = SOURCE_DESC[selectedSource];
     }
 
-    // Source type toggle
-    document.getElementById('source_type').addEventListener('change', function() {
-      const isGH = this.value === 'github_url';
-      document.getElementById('github-url-field').classList.toggle('hidden', !isGH);
-      document.getElementById('local-path-field').classList.toggle('hidden', isGH);
-    });
+    // Init source desc
+    document.getElementById('src-desc').textContent = SOURCE_DESC[selectedSource];
 
-    // --- Conversation builder ---
+    function syncEvidenceSection() {
+      document.querySelectorAll('.evidence-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('ev-' + selectedSource)?.classList.add('active');
+      const subtitles = {
+        github_url:   'Enter the GitHub repository URL and optional metadata.',
+        conversation: 'Build the conversation transcript turn by turn.',
+        document:     'Upload a document to evaluate.',
+      };
+      document.getElementById('evidence-subtitle').textContent = subtitles[selectedSource] || '';
+    }
+
+    // ── Conversation builder ─────────────────────────
     function addTurn() {
       const role = document.getElementById('conv-role-sel').value;
       const text = document.getElementById('conv-text').value.trim();
@@ -398,100 +426,166 @@
 
     function renderConversation() {
       const box = document.getElementById('conv-turns');
-      if (conversation.length === 0) {
+      if (!conversation.length) {
         box.innerHTML = '<div class="conv-empty">No turns yet. Add a message below.</div>';
         return;
       }
       box.innerHTML = conversation.map((t, i) =>
         `<div class="conv-turn">
           <span class="conv-role ${t.role}">${t.role}</span>
-          <span class="conv-content">${escHtml(t.content)}</span>
+          <span class="conv-content">${esc(t.content)}</span>
           <button class="conv-del" onclick="removeTurn(${i})" title="Remove">×</button>
         </div>`
       ).join('');
     }
-
-    function escHtml(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
     renderConversation();
 
-    // --- Build review panel ---
-    function buildReview() {
-      const mode = getMode();
-      document.getElementById('rv-mode').textContent = { behavior_only: 'Behavior Only', repository_only: 'Repository Only', hybrid: 'Hybrid' }[mode] || mode;
-      document.getElementById('rv-name').textContent = document.getElementById('agent_name').value || '(not set)';
-      document.getElementById('rv-domain').textContent = document.getElementById('domain').value;
-      document.getElementById('rv-autonomy').textContent = document.getElementById('high_autonomy').checked ? 'Yes' : 'No';
-
-      const policies = Array.from(document.querySelectorAll('input[name="policy"]:checked')).map(el => el.value);
-      document.getElementById('rv-policies').textContent = policies.join(', ') || '(none)';
-
-      let evHtml = '';
-      if (mode === 'repository_only' || mode === 'hybrid') {
-        const st = document.getElementById('source_type').value;
-        const url = st === 'github_url' ? document.getElementById('github_url').value : document.getElementById('local_path').value;
-        evHtml += `<div class="review-item">Repository: <span>${escHtml(url || '(not set)')}</span></div>`;
+    // ── Document upload ──────────────────────────────
+    document.getElementById('doc-file').addEventListener('change', async function() {
+      const file = this.files[0];
+      if (!file) return;
+      docFilename = file.name;
+      const preview = document.getElementById('doc-preview');
+      preview.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      try {
+        if (file.type === 'application/pdf') {
+          docContent = `[PDF document: ${file.name}]`;
+        } else {
+          docContent = await file.text();
+        }
+        const drop = document.getElementById('file-drop-zone');
+        drop.querySelector('.fd-label').textContent = file.name;
+        drop.querySelector('.fd-sub').textContent = `${(file.size / 1024).toFixed(1)} KB · ready`;
+      } catch(e) {
+        preview.textContent = 'Error reading file.';
       }
-      if (mode === 'behavior_only' || mode === 'hybrid') {
-        evHtml += `<div class="review-item">Conversation turns: <span>${conversation.length}</span></div>`;
-      }
-      document.getElementById('rv-evidence').innerHTML = evHtml || '—';
+    });
+
+    // ── API key detection ────────────────────────────
+    function detectProvider(val) {
+      const v = val.trim();
+      let provider = '';
+      if (v.startsWith('sk-ant-'))   provider = 'Anthropic';
+      else if (v.startsWith('sk-'))  provider = 'OpenAI';
+      else if (v.startsWith('AIza')) provider = 'Gemini';
+      else if (v.length > 0)         provider = 'Unknown provider';
+      const badge = document.getElementById('provider-badge');
+      badge.textContent = provider;
+      badge.style.display = provider ? 'inline-block' : 'none';
     }
 
-    // --- Submit ---
-    async function submitForm() {
-      const mode = getMode();
-      const agentName = document.getElementById('agent_name').value.trim() || 'Unnamed Agent';
-      const description = document.getElementById('description').value.trim();
-      const domain = document.getElementById('domain').value;
-      const highAutonomy = document.getElementById('high_autonomy').checked;
-      const policies = Array.from(document.querySelectorAll('input[name="policy"]:checked')).map(el => el.value);
+    // ── Review panel ─────────────────────────────────
+    function buildReview() {
+      document.getElementById('rv-name').textContent = document.getElementById('target_name').value.trim() || '—';
 
-      const fd = new FormData();
-      fd.append('evaluation_mode', mode);
-      fd.append('agent_name', agentName);
-      fd.append('description', description);
-      fd.append('domain', domain);
-      fd.append('high_autonomy', highAutonomy ? 'true' : 'false');
-      fd.append('selected_policies', JSON.stringify(policies));
-      fd.append('conversation', JSON.stringify(conversation));
+      const sourceLabels = { github_url: 'GitHub URL', conversation: 'Conversation', document: 'Document' };
+      document.getElementById('rv-source').textContent = sourceLabels[selectedSource] || selectedSource;
 
-      if (mode === 'repository_only' || mode === 'hybrid') {
-        const st = document.getElementById('source_type').value;
-        fd.append('source_type', st);
-        if (st === 'github_url') {
-          fd.append('github_url', document.getElementById('github_url').value.trim());
-        } else {
-          fd.append('local_path', document.getElementById('local_path').value.trim());
-        }
-        fd.append('repo_description', document.getElementById('repo_description').value.trim());
+      let detail = '';
+      if (selectedSource === 'github_url') {
+        const url = document.getElementById('github_url').value.trim();
+        detail = `<div class="review-item">URL: <span>${esc(url || '(not set)')}</span></div>`;
+        const fw = document.getElementById('framework').value.trim();
+        if (fw) detail += `<div class="review-item">Framework: <span>${esc(fw)}</span></div>`;
+      } else if (selectedSource === 'conversation') {
+        detail = `<div class="review-item">Turns: <span>${conversation.length}</span></div>`;
+      } else if (selectedSource === 'document') {
+        detail = `<div class="review-item">File: <span>${esc(docFilename || '(none)')}</span></div>`;
       }
+      document.getElementById('rv-evidence-detail').innerHTML = detail;
+
+      const apiKey = document.getElementById('api_key').value.trim();
+      let providerText = 'None (rules-only mode)';
+      if (apiKey.startsWith('sk-ant-')) providerText = 'Anthropic';
+      else if (apiKey.startsWith('sk-'))  providerText = 'OpenAI';
+      else if (apiKey.startsWith('AIza')) providerText = 'Gemini';
+      else if (apiKey)                    providerText = 'Unknown provider';
+      document.getElementById('rv-provider').textContent = providerText;
+    }
+
+    // ── Submit ───────────────────────────────────────
+    async function submitForm() {
+      const targetName = document.getElementById('target_name').value.trim() || 'Unnamed Agent';
+      const apiKey = document.getElementById('api_key').value.trim();
+
+      let evaluationMode, submission = null, convPayload = [];
+
+      if (selectedSource === 'github_url') {
+        evaluationMode = 'repository_only';
+        submission = {
+          source_type: 'github_url',
+          github_url: document.getElementById('github_url').value.trim(),
+          target_name: targetName,
+          description: '',
+        };
+      } else if (selectedSource === 'conversation') {
+        evaluationMode = 'behavior_only';
+        convPayload = conversation;
+      } else if (selectedSource === 'document') {
+        evaluationMode = 'behavior_only';
+        convPayload = docContent
+          ? [{ role: 'user', content: docContent.substring(0, 8000) }]
+          : [];
+      }
+
+      const metadata = {};
+      if (apiKey) metadata.api_key = apiKey;
+      const fw = document.getElementById('framework')?.value?.trim();
+      const llmb = document.getElementById('llm_backends')?.value?.trim();
+      const auth = document.getElementById('auth_signals')?.value?.trim();
+      const det  = document.getElementById('detected_signals')?.value?.trim();
+      if (fw)   metadata.framework        = fw;
+      if (llmb) metadata.llm_backends     = llmb;
+      if (auth) metadata.auth_signals     = auth;
+      if (det)  metadata.detected_signals = det;
+      if (selectedSource === 'document' && docFilename) metadata.document_filename = docFilename;
+
+      const body = {
+        evaluation_mode: evaluationMode,
+        context: { agent_name: targetName, domain: 'Other', capabilities: [], high_autonomy: false },
+        selected_policies: ['eu_ai_act', 'us_nist', 'iso', 'unesco'],
+        metadata,
+        conversation: convPayload,
+      };
+      if (submission) body.submission = submission;
 
       document.getElementById('loading-overlay').classList.add('show');
 
       try {
-        const resp = await fetch('/submit', { method: 'POST', body: fd });
+        const resp = await fetch('/v1/evaluations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
         if (!resp.ok) {
-          const err = await resp.json();
-          alert('Error: ' + (err.detail || resp.statusText));
+          const err = await resp.json().catch(() => ({}));
+          alert('Error ' + resp.status + ': ' + (err.detail || resp.statusText));
           return;
         }
         const data = await resp.json();
         sessionStorage.setItem('safe_result', JSON.stringify(data));
-        window.location.href = '/result';
-      } catch (e) {
+        const id = data.evaluation_id || '';
+        window.location.href = '/result' + (id ? `?id=${encodeURIComponent(id)}` : '');
+      } catch(e) {
         alert('Network error: ' + e.message);
       } finally {
         document.getElementById('loading-overlay').classList.remove('show');
       }
     }
 
-    // --- Colorblind toggle ---
+    // ── Colorblind mode ──────────────────────────────
     document.getElementById('cb-check').addEventListener('change', function() {
       document.body.classList.toggle('cb', this.checked);
+      sessionStorage.setItem('safe_cb', this.checked ? '1' : '0');
     });
+    if (sessionStorage.getItem('safe_cb') === '1') {
+      document.body.classList.add('cb');
+      document.getElementById('cb-check').checked = true;
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
   </script>
 </body>
 </html>

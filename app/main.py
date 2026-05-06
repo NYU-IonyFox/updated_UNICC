@@ -378,3 +378,63 @@ def get_report(evaluation_id: str) -> FileResponse:
             detail=f"No PDF report found for evaluation_id: {evaluation_id}",
         )
     return FileResponse(matches[0], media_type="application/pdf", filename=Path(matches[0]).name)
+
+
+def _find_archive(evaluation_id: str) -> Path | None:
+    """Search known report directories for a JSON archive matching evaluation_id."""
+    from app.config import REPORT_DIR
+    search_dirs = [
+        Path(REPORTS_DIR),
+        REPORT_DIR,
+        Path("data") / "reports",
+    ]
+    for d in search_dirs:
+        for pattern in [f"*{evaluation_id}*.json", f"{evaluation_id}*.json"]:
+            matches = glob.glob(str(d / pattern))
+            if matches:
+                return Path(matches[0])
+    return None
+
+
+@app.get(
+    "/v1/evaluations/{evaluation_id}/pdf",
+    summary="Download evaluation PDF (v1 path)",
+    include_in_schema=False,
+)
+def get_evaluation_pdf(evaluation_id: str) -> FileResponse:
+    return get_report(evaluation_id)
+
+
+@app.get(
+    "/v1/evaluations/{evaluation_id}/json",
+    summary="Download evaluation JSON archive (v1 path)",
+    include_in_schema=False,
+)
+def get_evaluation_json(evaluation_id: str):
+    archive = _find_archive(evaluation_id)
+    if not archive:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No JSON archive found for evaluation_id: {evaluation_id}",
+        )
+    return FileResponse(
+        str(archive),
+        media_type="application/json",
+        filename=archive.name,
+    )
+
+
+@app.get(
+    "/v1/evaluations/{evaluation_id}",
+    summary="Get evaluation result by ID (v1 path)",
+    include_in_schema=False,
+)
+def get_evaluation(evaluation_id: str):
+    archive = _find_archive(evaluation_id)
+    if not archive:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Evaluation not found: {evaluation_id}",
+        )
+    with open(str(archive), encoding="utf-8") as f:
+        return JSONResponse(json.load(f))

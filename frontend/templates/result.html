@@ -6,134 +6,203 @@
   <title>SAFE — Evaluation Result</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Inter, sans-serif; background: #F9F8F6; color: #1C1917; min-height: 100vh; }
 
-    /* Top bar */
+    /* ── Topbar ─────────────────────────────────────── */
     #topbar {
-      background: #44403C; color: #fff; padding: 0 40px; height: 52px;
-      display: flex; align-items: center; justify-content: space-between;
+      background: var(--color-warm-slate); color: #fff; padding: 0 36px; height: 50px;
+      display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;
     }
     .wordmark { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
     .btn-new {
-      padding: 7px 18px; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 7px;
-      background: none; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
-      transition: background 0.15s;
+      padding: 6px 16px; border: 1.5px solid rgba(255,255,255,0.45); border-radius: 7px;
+      background: none; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s;
     }
     .btn-new:hover { background: rgba(255,255,255,0.1); }
 
-    /* Page layout */
-    #page { max-width: 900px; margin: 0 auto; padding: 40px 40px 80px; }
+    /* ── Page ───────────────────────────────────────── */
+    #page { max-width: 900px; margin: 0 auto; padding: 36px 36px 100px; }
 
-    /* Verdict hero */
-    #verdict-hero { text-align: center; padding: 48px 0 32px; }
+    /* ── Verdict hero ───────────────────────────────── */
+    #verdict-hero { text-align: center; padding: 44px 0 28px; }
     #verdict-text { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 700; }
     #verdict-badge {
-      display: inline-block; padding: 6px 20px; border-radius: 20px; font-size: 14px; font-weight: 600;
-      margin-top: 12px;
+      display: inline-block; padding: 5px 18px; border-radius: 20px;
+      font-size: 13px; font-weight: 600; margin-top: 10px;
     }
-    #eval-id { color: #A8A29E; font-size: 12px; margin-top: 10px; }
-    #eval-ts { color: #A8A29E; font-size: 12px; }
+    #meta-row { color: #A8A29E; font-size: 11px; margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    #meta-row span { display: flex; align-items: center; gap: 4px; }
+    #meta-row .meta-dot { color: #D6D3D1; }
 
-    /* Verdict color vars — set by JS */
-    .verdict-APPROVE { --v-text: #3B6D11; --v-bg: #EAF3DE; }
-    .verdict-HOLD    { --v-text: #854F0B; --v-bg: #FAEEDA; }
-    .verdict-REJECT  { --v-text: #A32D2D; --v-bg: #FCEBEB; }
-    #verdict-text { color: var(--v-text, #1C1917); }
-    #verdict-badge { background: var(--v-bg, #F5F0EB); color: var(--v-text, #1C1917); }
+    /* verdict color vars */
+    .vREJECT  { --v-text: #A32D2D; --v-bg: #FCEBEB; }
+    .vHOLD    { --v-text: #854F0B; --v-bg: #FAEEDA; }
+    .vAPPROVE { --v-text: #3B6D11; --v-bg: #EAF3DE; }
+    #verdict-text   { color: var(--v-text, #1C1917); }
+    #verdict-badge  { background: var(--v-bg, #F5F0EB); color: var(--v-text, #1C1917); }
 
-    /* Colorblind overrides */
-    body.cb .verdict-APPROVE { --v-text: #005C00; --v-bg: #D6F0D6; }
-    body.cb .verdict-HOLD    { --v-text: #5C4400; --v-bg: #FFF3CC; }
-    body.cb .verdict-REJECT  { --v-text: #005C99; --v-bg: #D6E8FF; }
+    /* colorblind overrides */
+    body.cb .vREJECT  { --v-text: #005C99; --v-bg: #D6E8FF; }
+    body.cb .vHOLD    { --v-text: #5C4400; --v-bg: #FFF3CC; }
+    body.cb .vAPPROVE { --v-text: #005C00; --v-bg: #D6F0D6; }
 
-    /* Rule reference */
+    /* ── Rule reference block ───────────────────────── */
     #rule-block {
-      background: #F5F0EB; border-left: 4px solid #78716C; border-radius: 8px;
-      padding: 16px 20px; margin-bottom: 28px; font-size: 14px;
+      border-left: 2px solid var(--color-warm-slate); background: var(--color-rule-ref-bg);
+      border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 0 0 28px;
+      font-size: 13px; color: #44403C;
     }
-    #rule-block .rule-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #78716C; margin-bottom: 6px; }
+    #rule-block .rule-label {
+      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #78716C; margin-bottom: 4px;
+    }
 
-    /* Expert cards grid */
-    #experts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
-    @media (max-width: 700px) { #experts-grid { grid-template-columns: 1fr; } }
+    /* ── Section wrappers ───────────────────────────── */
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #78716C; margin-bottom: 12px;
+    }
 
-    .expert-card { border-radius: 12px; overflow: hidden; }
-    .expert-card-header { padding: 14px 16px; color: #fff; }
-    .expert-card-header .expert-tag { font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-bottom: 4px; }
-    .expert-card-header .expert-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
-    .expert-card-header .expert-role { font-size: 8.5px; opacity: 0.75; margin-top: 2px; }
-    .expert-card-body { padding: 14px 16px; }
+    /* ── Expert cards grid ──────────────────────────── */
+    #experts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    @media (max-width: 680px) { #experts-grid { grid-template-columns: 1fr; } }
+
+    .expert-card { border-radius: 12px; overflow: hidden; border: 1px solid var(--color-card-border); }
+    .expert-header {
+      height: 88px; padding: 12px 14px; color: #fff;
+      display: flex; flex-direction: column; justify-content: flex-start;
+    }
+    .expert-tag  { font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 3px; }
+    .expert-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
+    .expert-role { font-size: 8.5px; opacity: 0.7; margin-top: 2px; }
+
+    .expert-body {
+      height: 140px; padding: 12px 14px; overflow: hidden;
+      display: flex; flex-direction: column; gap: 6px;
+    }
     .overall-pill {
-      display: inline-block; padding: 4px 12px; border-radius: 12px;
-      font-size: 12px; font-weight: 600; margin-bottom: 12px;
+      display: inline-block; padding: 3px 11px; border-radius: 12px;
+      font-size: 11px; font-weight: 600; align-self: flex-start;
     }
-    .sev-HIGH   { background: #FCEBEB; color: #A32D2D; }
-    .sev-MEDIUM { background: #FAEEDA; color: #854F0B; }
-    .sev-LOW    { background: #EAF3DE; color: #3B6D11; }
+    .sev-HIGH   { background: var(--color-high-bg); color: var(--color-high-text); }
+    .sev-MEDIUM { background: var(--color-med-bg);  color: var(--color-med-text);  }
+    .sev-LOW    { background: var(--color-low-bg);  color: var(--color-low-text);  }
     body.cb .sev-HIGH   { background: #D6E8FF; color: #005C99; }
     body.cb .sev-MEDIUM { background: #FFF3CC; color: #5C4400; }
     body.cb .sev-LOW    { background: #D6F0D6; color: #005C00; }
 
-    .dim-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .dim-chip {
-      font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 600;
-    }
-    .no-dims { font-size: 12px; color: #A8A29E; }
-
-    /* Additional findings */
-    #findings-section { margin-bottom: 32px; }
-    .section-title {
-      font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-      color: #78716C; margin-bottom: 12px;
-    }
-    .finding-item {
-      background: #FAEEDA; border-left: 3px solid #D4A820; border-radius: 6px;
-      padding: 12px 16px; font-size: 13px; margin-bottom: 8px;
+    .trigger-text { font-size: 11px; color: #78716C; line-height: 1.4; overflow: hidden; flex: 1; }
+    .dim-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+    .dim-pill {
+      font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 8px;
+      border: 1px solid transparent;
     }
 
-    /* Collapsible recommendations */
-    #recs-section { margin-bottom: 32px; }
+    .expert-footer {
+      padding: 9px 14px; border-top: 1px solid var(--color-divider);
+    }
+    .see-scores-btn {
+      background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600;
+      text-decoration: underline; padding: 0; transition: opacity 0.15s;
+    }
+    .see-scores-btn:hover { opacity: 0.7; }
+
+    /* ── Scores panel (renders below grid) ──────────── */
+    #scores-panel {
+      display: none; border: 1px solid var(--color-card-border);
+      border-radius: 10px; overflow: hidden; margin-bottom: 28px;
+    }
+    #scores-panel.open { display: block; }
+    .scores-header {
+      padding: 10px 16px; font-size: 11px; font-weight: 600; color: #fff;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .score-row {
+      display: flex; align-items: center; gap: 10px; padding: 9px 16px;
+      border-bottom: 1px solid var(--color-card-border); font-size: 13px;
+    }
+    .score-row:last-child { border-bottom: none; }
+    .score-dim  { flex: 1; }
+    .score-core {
+      font-size: 9px; font-weight: 600; text-transform: uppercase; padding: 2px 7px;
+      border-radius: 4px; background: var(--color-core-bg); color: var(--color-core-text); flex-shrink: 0;
+    }
+    .score-badge {
+      min-width: 32px; text-align: center; font-size: 10px; font-weight: 600;
+      padding: 2px 8px; border-radius: 6px; flex-shrink: 0;
+    }
+
+    /* ── Collapsible sections ────────────────────────── */
+    .collapsible { margin-bottom: 10px; border: 1px solid var(--color-card-border); border-radius: 10px; overflow: hidden; }
     .collapsible-header {
       display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; padding: 14px 16px; background: #F5F0EB; border-radius: 8px;
-      font-size: 14px; font-weight: 600; user-select: none;
+      padding: 13px 16px; background: var(--color-rule-ref-bg); cursor: pointer;
+      font-size: 13px; font-weight: 600; user-select: none;
     }
-    .collapsible-header .chevron { transition: transform 0.2s; font-size: 16px; }
+    .collapsible-header .chevron { font-size: 12px; transition: transform 0.2s; color: #78716C; }
     .collapsible-header.open .chevron { transform: rotate(180deg); }
-    .collapsible-body { display: none; padding: 16px; }
+    .collapsible-body { display: none; padding: 14px 16px; background: #fff; }
     .collapsible-body.open { display: block; }
-    .rec-item { font-size: 13px; padding: 8px 0; border-bottom: 1px solid #E7E5E4; }
-    .rec-item:last-child { border-bottom: none; }
 
-    /* Download bar */
+    /* ── Findings / violations ──────────────────────── */
+    .finding-item {
+      padding: 10px 14px; margin-bottom: 8px; border-radius: 8px;
+      font-size: 13px; line-height: 1.5;
+      border-left: 3px solid #D4A820; background: var(--color-med-bg);
+    }
+    .finding-item:last-child { margin-bottom: 0; }
+
+    .weak-item {
+      border: 1px solid var(--color-weak-border); background: var(--color-weak-bg);
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 13px;
+    }
+
+    /* ── Recommendations (always visible) ───────────── */
+    #recs-section { margin-bottom: 28px; }
+    .rec-item {
+      display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--color-card-border);
+      font-size: 13px; line-height: 1.5;
+    }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-num {
+      font-size: 11px; font-weight: 600; color: #A8A29E; flex-shrink: 0;
+      width: 22px; padding-top: 1px;
+    }
+    .rec-source { font-size: 11px; color: #A8A29E; margin-left: auto; flex-shrink: 0; padding-left: 12px; }
+
+    /* ── Raw payload ────────────────────────────────── */
+    .raw-pre {
+      background: #1C1917; color: #E7E5E4; padding: 16px; border-radius: 8px;
+      font-size: 11px; font-family: monospace; overflow-x: auto; max-height: 400px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-all;
+    }
+
+    /* ── Download bar ───────────────────────────────── */
     #download-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: #fff; border-top: 1px solid #E7E5E4;
-      padding: 14px 40px; display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+      background: #fff; border-top: 1px solid var(--color-card-border);
+      padding: 12px 36px; display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; box-shadow: 0 -4px 18px rgba(0,0,0,0.07); z-index: 50;
     }
-    .dl-label { font-size: 13px; color: #78716C; }
-    .dl-buttons { display: flex; gap: 10px; }
+    #download-bar.hidden { display: none; }
+    .dl-label { font-size: 12px; color: #78716C; }
+    .dl-buttons { display: flex; gap: 9px; }
     .btn-dl-pdf, .btn-dl-json {
-      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
-      cursor: pointer; text-decoration: none; display: inline-block;
+      padding: 8px 18px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block; transition: opacity 0.15s;
     }
-    .btn-dl-pdf  { background: #44403C; color: #fff; border: none; }
-    .btn-dl-json { background: #fff; color: #44403C; border: 1.5px solid #D6D3D1; }
-    .btn-dl-pdf:hover { opacity: 0.88; }
+    .btn-dl-pdf  { background: var(--color-warm-slate); color: #fff; border: none; }
+    .btn-dl-json { background: #fff; color: var(--color-warm-slate); border: 1.5px solid #D6D3D1; }
+    .btn-dl-pdf:hover, .btn-dl-json:hover { opacity: 0.82; }
 
-    /* Translation pill */
-    .translation-pill {
-      display: inline-block; padding: 3px 10px; border-radius: 10px;
-      background: #F5F0EB; color: #78716C; font-size: 11px; font-weight: 600; margin-top: 8px;
-    }
-
-    /* Empty / error state */
-    #no-data { text-align: center; padding: 80px 20px; color: #78716C; }
-    #no-data h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 12px; }
+    /* ── Empty state ────────────────────────────────── */
+    #no-data { text-align: center; padding: 80px 20px; color: #78716C; display: none; }
+    #no-data h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -143,150 +212,499 @@
   </div>
 
   <div id="page">
-    <!-- Rendered by JS -->
-    <div id="no-data" style="display:none;">
+    <div id="no-data">
       <h2>No result found</h2>
       <p>Please start a new evaluation from the home page.</p>
+      <br/>
+      <button class="btn-new" style="background:var(--color-warm-slate);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;" onclick="window.location.href='/'">Go to Home</button>
     </div>
   </div>
 
-  <div id="download-bar" style="display:none;">
+  <div id="download-bar" class="hidden">
     <span class="dl-label" id="dl-label">Evaluation complete</span>
     <div class="dl-buttons">
-      <a class="btn-dl-json" id="dl-json-btn" href="#" download>Download JSON</a>
-      <a class="btn-dl-pdf" id="dl-pdf-btn" href="#" target="_blank">Download PDF Report</a>
+      <a class="btn-dl-json" id="dl-json-btn" href="#">Download JSON</a>
+      <a class="btn-dl-pdf"  id="dl-pdf-btn"  href="#" target="_blank">Download PDF Report</a>
     </div>
   </div>
 
   <script>
-    // Expert card palette
-    const EXPERT_STYLE = {
-      expert_adversarial_security: { headerBg: '#3D6070', bodyBg: '#F2F7FA', pillBg: '#E0EDF5', role: 'Adversarial Security' },
-      expert_content_safety:       { headerBg: '#4A4880', bodyBg: '#F3F2FA', pillBg: '#E2E1F5', role: 'Content Safety' },
-      expert_governance_un:        { headerBg: '#634078', bodyBg: '#F6F1FA', pillBg: '#EAE0F5', role: 'Governance & UN' },
+    // ── Expert card palette ──────────────────────────
+    const CARD_STYLES = [
+      { label: 'Expert 1', headerBg: '#3D6070', bodyBg: '#F2F7FA', pillBg: '#E0EDF5', pillBorder: '#B8D4E2' },
+      { label: 'Expert 2', headerBg: '#4A4880', bodyBg: '#F3F2FA', pillBg: '#E2E1F5', pillBorder: '#BBBAE0' },
+      { label: 'Expert 3', headerBg: '#634078', bodyBg: '#F6F1FA', pillBg: '#EAE0F5', pillBorder: '#CBAFE0' },
+    ];
+
+    // Maps expert identifiers → card index and display info
+    const EXPERT_META = {
+      // New SAFE format
+      expert_adversarial_security: { idx: 0, name: 'Adversarial Security',  role: 'Jailbreak · Injection · Multilingual' },
+      expert_content_safety:       { idx: 1, name: 'Content Safety',         role: 'Data leakage · Bias · Compliance' },
+      expert_governance_un:        { idx: 2, name: 'Governance & UN',        role: 'EU AI Act · NIST · UNESCO · UN Charter' },
+      // Old orchestrator format
+      team1_policy_expert:   { idx: 0, name: 'Policy & Compliance',  role: 'Regulatory frameworks · Policy risk' },
+      team2_redteam_expert:  { idx: 1, name: 'Adversarial Misuse',   role: 'Red team · Attack surface · Misuse' },
+      team3_risk_expert:     { idx: 2, name: 'System & Deployment',  role: 'Architecture · Deployment risk' },
     };
 
     const BADGE_TEXT = {
-      APPROVE: 'Cleared for UNICC deployment',
-      HOLD:    'Human review required',
       REJECT:  'Do not deploy into UNICC systems',
+      HOLD:    'Human review required',
+      APPROVE: 'Cleared for UNICC deployment',
     };
 
+    // ── Data detection & normalisation ──────────────
+    function isSafeFormat(data) { return 'verdict' in data; }
+
+    function getVerdict(data) {
+      if (isSafeFormat(data)) return data.verdict;
+      const d = data.decision || 'HOLD';
+      return d === 'REVIEW' ? 'HOLD' : d;
+    }
+
+    function mapRiskTier(tier, score) {
+      // Old format risk_tier values
+      if (tier === 'HIGH') return 'HIGH';
+      if (tier === 'MINIMAL' || tier === 'LIMITED' || tier === 'LOW') return 'LOW';
+      // Fall back to numeric score
+      if (typeof score === 'number') return score >= 0.65 ? 'HIGH' : score >= 0.35 ? 'MEDIUM' : 'LOW';
+      return 'MEDIUM';
+    }
+
+    function normaliseExperts(data) {
+      const safe = isSafeFormat(data);
+      return (data.experts || []).map((e, i) => {
+        const key  = safe ? e.id : e.expert_name;
+        const meta = EXPERT_META[key] || { idx: i, name: key, role: '' };
+        if (safe) {
+          // ExpertOutput
+          return {
+            idx:     meta.idx,
+            name:    meta.name,
+            role:    meta.role,
+            overall: e.overall,
+            summary: '',
+            pills:   (e.triggered_dimensions || []).map(d => d.display_name || d.name),
+            dims:    (e.triggered_dimensions || []).map(d => ({
+              name:  d.display_name || d.name,
+              tier:  d.tier,
+              level: d.level,
+            })),
+          };
+        } else {
+          // ExpertVerdict
+          const overall = mapRiskTier(e.risk_tier, e.risk_score);
+          return {
+            idx:     meta.idx,
+            name:    meta.name,
+            role:    meta.role,
+            overall: overall,
+            summary: e.summary || '',
+            pills:   (e.findings || []).slice(0, 4).map(f => f.length > 36 ? f.slice(0, 33) + '…' : f),
+            dims:    (e.findings || []).map(f => ({ name: f, tier: null, level: overall })),
+          };
+        }
+      }).sort((a, b) => a.idx - b.idx);
+    }
+
+    function getPrimaryRule(data) {
+      if (isSafeFormat(data)) {
+        const pr = data.primary_reason;
+        return typeof pr === 'string' ? pr : (pr?.rule || JSON.stringify(pr || ''));
+      }
+      return data.council_result?.decision_rule_triggered || '';
+    }
+
+    function getAdditionalFindings(data) {
+      if (isSafeFormat(data)) return data.additional_findings || [];
+      const cr = data.council_result || {};
+      return [...(cr.cross_expert_critique || []), ...(cr.key_evidence || [])].filter(Boolean);
+    }
+
+    function getRecommendations(data) {
+      if (isSafeFormat(data)) {
+        return (data.recommendations || []).map(r => typeof r === 'string' ? r : (r?.text || JSON.stringify(r)));
+      }
+      return data.council_result?.recommended_actions || [];
+    }
+
+    function getTranslationInfo(data) {
+      if (isSafeFormat(data)) return data.translation_report;
+      const bs = data.behavior_summary;
+      if (!bs) return null;
+      return {
+        translation_applied: false,
+        primary_language: bs.primary_language || 'unknown',
+        confidence_numeric: bs.translation_confidence,
+        confidence_warning: bs.uncertainty_flag,
+        multilingual_jailbreak_suspected: bs.multilingual_jailbreak_forced_low,
+        detected_languages: bs.detected_languages,
+      };
+    }
+
+    // ── Render ───────────────────────────────────────
     function render(data) {
-      const verdict = data.verdict || 'HOLD';
-      const page = document.getElementById('page');
+      const page    = document.getElementById('page');
+      const verdict = getVerdict(data);
+      const experts = normaliseExperts(data);
+      const rule    = getPrimaryRule(data);
+      const id      = data.evaluation_id || '—';
+      const ts      = data.timestamp || '';
 
       // Verdict hero
-      const heroDiv = document.createElement('div');
-      heroDiv.id = 'verdict-hero';
-      heroDiv.className = 'verdict-' + verdict;
-      heroDiv.innerHTML = `
-        <div id="verdict-text">${verdict}</div>
-        <div id="verdict-badge">${BADGE_TEXT[verdict] || verdict}</div>
-        <div id="eval-id">Evaluation ID: ${esc(data.evaluation_id || '—')}</div>
-        <div id="eval-ts">${esc(data.timestamp || '')}</div>
-        ${data.translation_report?.translation_applied
-          ? `<span class="translation-pill">Translation applied · ${esc(data.translation_report.primary_language || '')}</span>` : ''}
-      `;
-      page.appendChild(heroDiv);
+      const hero = el('div', 'verdict-hero v' + verdict);
+      hero.id = 'verdict-hero';
+      const execMode = experts[0]?.role ? '' : '';
+      const inputType = isSafeFormat(data)
+        ? (data.submission_context?.input_type || '')
+        : (data.behavior_summary?.evaluation_mode || data.experts?.[0]?.evidence?.execution_path || '');
+      hero.innerHTML = `
+        <div id="verdict-text">${esc(verdict)}</div>
+        <div id="verdict-badge">${esc(BADGE_TEXT[verdict] || verdict)}</div>
+        <div id="meta-row">
+          ${inputType ? `<span>${esc(inputType)}</span><span class="meta-dot">·</span>` : ''}
+          <span>ID: ${esc(id)}</span>
+          ${ts ? `<span class="meta-dot">·</span><span>${esc(ts.slice(0,19).replace('T',' '))}</span>` : ''}
+        </div>`;
+      page.appendChild(hero);
 
       // Rule reference
-      if (data.primary_reason) {
-        const rb = document.createElement('div');
+      if (rule) {
+        const rb = el('div');
         rb.id = 'rule-block';
-        rb.innerHTML = `<div class="rule-label">Decision Rule</div>${esc(data.primary_reason.rule || JSON.stringify(data.primary_reason))}`;
+        rb.innerHTML = `<div class="rule-label">Decision Rule</div>${esc(rule)}`;
         page.appendChild(rb);
       }
 
-      // Expert cards
-      if (data.experts && data.experts.length) {
-        const grid = document.createElement('div');
-        grid.id = 'experts-grid';
-        data.experts.forEach(expert => {
-          const style = EXPERT_STYLE[expert.id] || { headerBg: '#44403C', bodyBg: '#F9F8F6', pillBg: '#F5F0EB', role: expert.id };
-          const card = document.createElement('div');
-          card.className = 'expert-card';
-          const dims = (expert.triggered_dimensions || []);
-          const dimsHtml = dims.length
-            ? dims.map(d => `<span class="dim-chip sev-${d.level || 'LOW'}" style="background:${style.pillBg}">${esc(d.name || d.dimension || '')}</span>`).join('')
-            : '<span class="no-dims">No issues detected</span>';
-          card.innerHTML = `
-            <div class="expert-card-header" style="background:${style.headerBg}">
-              <div class="expert-tag">Expert</div>
-              <div class="expert-name">${esc(style.role)}</div>
-              <div class="expert-role">${esc(expert.id)}</div>
-            </div>
-            <div class="expert-card-body" style="background:${style.bodyBg}">
-              <div class="overall-pill sev-${expert.overall}">${expert.overall}</div>
-              <div class="dim-list">${dimsHtml}</div>
-            </div>`;
-          grid.appendChild(card);
+      // Expert Council section
+      const councilSec = el('div', 'section');
+      const gridLabel  = el('div', 'section-title');
+      gridLabel.textContent = 'Expert Council';
+      councilSec.appendChild(gridLabel);
+
+      const grid = el('div');
+      grid.id = 'experts-grid';
+
+      // Scores panel (outside grid)
+      const scoresPanel = el('div');
+      scoresPanel.id = 'scores-panel';
+
+      let activeScoresIdx = -1;
+
+      experts.forEach((expert, i) => {
+        const style = CARD_STYLES[expert.idx] || CARD_STYLES[i % 3];
+        const card  = el('div', 'expert-card');
+
+        // Header
+        const header = el('div', 'expert-header');
+        header.style.background = style.headerBg;
+        header.innerHTML = `
+          <div class="expert-tag">${esc(style.label)}</div>
+          <div class="expert-name">${esc(expert.name)}</div>
+          <div class="expert-role">${esc(expert.role)}</div>`;
+
+        // Body
+        const body = el('div', 'expert-body');
+        body.style.background = style.bodyBg;
+        const pillsHtml = expert.pills.length
+          ? expert.pills.map(p =>
+              `<span class="dim-pill sev-${expert.overall}" style="background:${style.pillBg};border-color:${style.pillBorder}">` +
+              (expert.overall === 'HIGH' ? '● ' : '') + esc(p) + `</span>`
+            ).join('')
+          : '<span style="font-size:11px;color:#A8A29E">No issues detected</span>';
+        body.innerHTML = `
+          <div class="overall-pill sev-${expert.overall}">${esc(expert.overall)}</div>
+          <div class="trigger-text">${esc(expert.summary)}</div>
+          <div class="dim-pills">${pillsHtml}</div>`;
+
+        // Footer
+        const footer = el('div', 'expert-footer');
+        footer.style.background = style.bodyBg;
+        const btn = el('button', 'see-scores-btn');
+        btn.textContent = '▸ See dimension scores';
+        btn.style.color = style.headerBg;
+        btn.addEventListener('click', () => {
+          if (activeScoresIdx === i) {
+            // collapse
+            activeScoresIdx = -1;
+            scoresPanel.classList.remove('open');
+            btn.textContent = '▸ See dimension scores';
+          } else {
+            activeScoresIdx = i;
+            renderScores(scoresPanel, expert, style);
+            scoresPanel.classList.add('open');
+            // reset all buttons
+            grid.querySelectorAll('.see-scores-btn').forEach(b => {
+              b.textContent = '▸ See dimension scores';
+            });
+            btn.textContent = '▾ Hide dimension scores';
+          }
         });
-        page.appendChild(grid);
-      }
+        footer.appendChild(btn);
+
+        card.appendChild(header);
+        card.appendChild(body);
+        card.appendChild(footer);
+        grid.appendChild(card);
+      });
+
+      councilSec.appendChild(grid);
+      councilSec.appendChild(scoresPanel);
+      page.appendChild(councilSec);
 
       // Additional findings
-      if (data.additional_findings && data.additional_findings.length) {
-        const sec = document.createElement('div');
-        sec.id = 'findings-section';
-        sec.innerHTML = `<div class="section-title">Additional Findings</div>` +
-          data.additional_findings.map(f =>
-            `<div class="finding-item">${esc(typeof f === 'string' ? f : JSON.stringify(f))}</div>`
-          ).join('');
-        page.appendChild(sec);
+      const findings = getAdditionalFindings(data);
+      if (findings.length) {
+        page.appendChild(makeCollapsible('Additional Findings', findings.map(f =>
+          `<div class="finding-item">${esc(f)}</div>`
+        ).join(''), false));
       }
 
-      // Recommendations (collapsible)
-      if (data.recommendations && data.recommendations.length) {
-        const sec = document.createElement('div');
-        sec.id = 'recs-section';
-        sec.innerHTML = `
-          <div class="collapsible-header" onclick="toggleCollapsible(this)">
-            Recommendations (${data.recommendations.length})
-            <span class="chevron">▼</span>
-          </div>
-          <div class="collapsible-body">
-            ${data.recommendations.map(r => `<div class="rec-item">${esc(typeof r === 'string' ? r : JSON.stringify(r))}</div>`).join('')}
-          </div>`;
-        page.appendChild(sec);
+      // Submission context
+      const subCtx = buildSubmissionContext(data);
+      if (subCtx) page.appendChild(makeCollapsible('Submission Context', subCtx, false));
+
+      // Regulatory violations (SAFE format only)
+      if (isSafeFormat(data)) {
+        const violations = buildViolations(data);
+        if (violations) page.appendChild(makeCollapsible('Regulatory Violations', violations, false));
       }
+
+      // Evidence quality (SAFE format only)
+      if (isSafeFormat(data)) {
+        const evq = buildEvidenceQuality(data);
+        if (evq) page.appendChild(makeCollapsible('Evidence Quality', evq, false));
+      }
+
+      // Translation report
+      const tinfo = getTranslationInfo(data);
+      if (tinfo) {
+        const tr = buildTranslationReport(tinfo);
+        if (tr) page.appendChild(makeCollapsible('Translation Report', tr, false));
+      }
+
+      // Recommendations (always visible)
+      const recs = getRecommendations(data);
+      if (recs.length) {
+        const recSec = el('div', 'section');
+        recSec.id = 'recs-section';
+        const recTitle = el('div', 'section-title');
+        recTitle.textContent = `Recommendations (${recs.length})`;
+        recSec.appendChild(recTitle);
+        const recList = el('div');
+        recs.forEach((r, i) => {
+          const item = el('div', 'rec-item');
+          item.innerHTML = `<span class="rec-num">${i + 1}.</span><span>${esc(r)}</span>`;
+          recList.appendChild(item);
+        });
+        recSec.appendChild(recList);
+        page.appendChild(recSec);
+      }
+
+      // Raw evaluation payload
+      const safeRaw = Object.assign({}, data);
+      // Strip sensitive input content per security requirement
+      if (safeRaw.expert_input) delete safeRaw.expert_input;
+      if (safeRaw.conversation) delete safeRaw.conversation;
+      page.appendChild(makeCollapsible(
+        'Raw Evaluation Payload',
+        `<pre class="raw-pre">${esc(JSON.stringify(safeRaw, null, 2))}</pre>`,
+        false
+      ));
 
       // Download bar
       const bar = document.getElementById('download-bar');
-      bar.style.display = 'flex';
-      document.getElementById('dl-label').textContent = `${verdict} · ${esc(data.evaluation_id || '')}`;
+      bar.classList.remove('hidden');
+      document.getElementById('dl-label').textContent = `${verdict} · ${id}`;
 
-      // JSON download
+      // JSON download (client-side blob)
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      document.getElementById('dl-json-btn').href = URL.createObjectURL(blob);
-      document.getElementById('dl-json-btn').download = `${data.evaluation_id || 'result'}.json`;
+      const jsonBtn = document.getElementById('dl-json-btn');
+      jsonBtn.href = URL.createObjectURL(blob);
+      jsonBtn.download = `${id}.json`;
 
-      // PDF download (via API endpoint)
-      if (data.evaluation_id) {
-        document.getElementById('dl-pdf-btn').href = `/report/${encodeURIComponent(data.evaluation_id)}`;
+      // Try server-side JSON endpoint too
+      if (id && id !== '—') {
+        jsonBtn.href = `/v1/evaluations/${encodeURIComponent(id)}/json`;
+        jsonBtn.download = '';
+        document.getElementById('dl-pdf-btn').href = `/v1/evaluations/${encodeURIComponent(id)}/pdf`;
       }
     }
 
-    function toggleCollapsible(header) {
-      header.classList.toggle('open');
-      header.nextElementSibling.classList.toggle('open');
+    function renderScores(panel, expert, style) {
+      panel.innerHTML = '';
+      const hdr = el('div', 'scores-header');
+      hdr.style.background = style.headerBg;
+      hdr.textContent = expert.name + ' — Dimension Scores';
+      panel.appendChild(hdr);
+
+      if (!expert.dims.length) {
+        const empty = el('div');
+        empty.style.cssText = 'padding:14px 16px;font-size:13px;color:#A8A29E;';
+        empty.textContent = 'No dimension scores available.';
+        panel.appendChild(empty);
+        return;
+      }
+      expert.dims.forEach(d => {
+        const row = el('div', 'score-row');
+        const nameEl = el('span', 'score-dim');
+        nameEl.textContent = d.name;
+        row.appendChild(nameEl);
+        if (d.tier === 'CORE' || d.tier === 'IMPORTANT') {
+          const chip = el('span', 'score-core');
+          chip.textContent = d.tier;
+          row.appendChild(chip);
+        }
+        const badge = el('span', 'score-badge sev-' + (d.level || 'LOW'));
+        badge.textContent = d.level || 'LOW';
+        row.appendChild(badge);
+        panel.appendChild(row);
+      });
+    }
+
+    // ── Section builders ─────────────────────────────
+    function buildSubmissionContext(data) {
+      const parts = [];
+      if (isSafeFormat(data)) {
+        const ctx = data.submission_context || {};
+        if (ctx.target_name) parts.push(`<div class="review-item">Target: <strong>${esc(ctx.target_name)}</strong></div>`);
+        if (ctx.input_type)  parts.push(`<div class="review-item">Input type: <strong>${esc(ctx.input_type)}</strong></div>`);
+        if (ctx.evaluation_id) parts.push(`<div class="review-item">ID: <strong>${esc(ctx.evaluation_id)}</strong></div>`);
+      } else {
+        const sub = data.submission || {};
+        if (sub.target_name) parts.push(`<div class="review-item">Target: <strong>${esc(sub.target_name)}</strong></div>`);
+        if (sub.source_type) parts.push(`<div class="review-item">Source type: <strong>${esc(sub.source_type)}</strong></div>`);
+        if (sub.github_url)  parts.push(`<div class="review-item">GitHub URL: <strong>${esc(sub.github_url)}</strong></div>`);
+        const bs = data.behavior_summary;
+        if (bs) {
+          parts.push(`<div class="review-item">Evaluation mode: <strong>${esc(bs.evaluation_mode)}</strong></div>`);
+          parts.push(`<div class="review-item">Transcript present: <strong>${bs.transcript_present ? 'Yes' : 'No'}</strong></div>`);
+        }
+      }
+      return parts.length ? `<div style="font-size:13px;line-height:2;">${parts.join('')}</div>` : null;
+    }
+
+    function buildViolations(data) {
+      // SAFE format: scan triggered dimensions for regulatory_anchor
+      const violations = [];
+      (data.experts || []).forEach(expert => {
+        (expert.triggered_dimensions || []).forEach(d => {
+          if (d.regulatory_anchor && d.level !== 'LOW') {
+            violations.push({
+              level: d.level,
+              anchor: d.regulatory_anchor,
+              name: d.display_name || d.name,
+              reason: d.reason || '',
+            });
+          }
+        });
+      });
+      if (!violations.length) return null;
+      return violations.map(v =>
+        `<div class="finding-item">
+          <span class="score-badge sev-${v.level}" style="display:inline-block;margin-right:8px;">${esc(v.level)}</span>
+          <strong>${esc(v.anchor)}</strong> — ${esc(v.name)}<br/>
+          <span style="font-size:12px;color:#78716C;">${esc(v.reason)}</span>
+        </div>`
+      ).join('');
+    }
+
+    function buildEvidenceQuality(data) {
+      const weak = [];
+      (data.experts || []).forEach(expert => {
+        (expert.triggered_dimensions || []).forEach(d => {
+          if (d.evidence_quality === 'Weak') {
+            weak.push({ name: d.display_name || d.name, reason: d.reason || '' });
+          }
+        });
+      });
+      if (!weak.length) return null;
+      return weak.map(w =>
+        `<div class="weak-item"><strong>${esc(w.name)}</strong><br/><span style="font-size:12px;">${esc(w.reason)}</span></div>`
+      ).join('');
+    }
+
+    function buildTranslationReport(tr) {
+      if (!tr) return null;
+      const lines = [];
+      if (tr.translation_applied) {
+        lines.push(`<div class="review-item">Translation applied: <strong>Yes</strong></div>`);
+        lines.push(`<div class="review-item">Primary language: <strong>${esc(tr.primary_language || '—')}</strong></div>`);
+      } else {
+        lines.push(`<div class="review-item">Translation applied: <strong>No</strong></div>`);
+        lines.push(`<div class="review-item">Detected language: <strong>${esc(tr.primary_language || '—')}</strong></div>`);
+      }
+      if (tr.confidence_qualitative) {
+        lines.push(`<div class="review-item">Confidence: <strong>${esc(tr.confidence_qualitative)}</strong></div>`);
+        if (tr.confidence_note) lines.push(`<div style="font-size:12px;color:#78716C;margin-top:4px;">${esc(tr.confidence_note)}</div>`);
+      } else if (typeof tr.confidence_numeric === 'number') {
+        const pct = (tr.confidence_numeric * 100).toFixed(0) + '%';
+        lines.push(`<div class="review-item">Confidence: <strong>${pct}</strong></div>`);
+        if (tr.confidence_warning) {
+          lines.push(`<div class="weak-item" style="margin-top:8px;">⚠ Low confidence — translation uncertainty flag active</div>`);
+        }
+      }
+      if (tr.multilingual_jailbreak_suspected) {
+        lines.push(`<div class="finding-item" style="margin-top:8px;">Multilingual jailbreak pattern suspected in input.</div>`);
+      }
+      return `<div style="font-size:13px;line-height:1.9;">${lines.join('')}</div>`;
+    }
+
+    // ── Collapsible helper ───────────────────────────
+    function makeCollapsible(title, contentHtml, defaultOpen) {
+      const wrap  = el('div', 'collapsible');
+      const hdr   = el('div', 'collapsible-header' + (defaultOpen ? ' open' : ''));
+      hdr.innerHTML = `<span>${esc(title)}</span><span class="chevron">▼</span>`;
+      const body  = el('div', 'collapsible-body' + (defaultOpen ? ' open' : ''));
+      body.innerHTML = contentHtml;
+      hdr.addEventListener('click', () => {
+        hdr.classList.toggle('open');
+        body.classList.toggle('open');
+      });
+      wrap.appendChild(hdr);
+      wrap.appendChild(body);
+      return wrap;
+    }
+
+    // ── DOM helper ───────────────────────────────────
+    function el(tag, cls) {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      return e;
     }
 
     function esc(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return String(s ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Load result
-    const raw = sessionStorage.getItem('safe_result');
+    // ── Load data ────────────────────────────────────
+    const urlId = new URLSearchParams(window.location.search).get('id');
+    const raw   = sessionStorage.getItem('safe_result');
+
+    let data = null;
     if (raw) {
-      try { render(JSON.parse(raw)); }
-      catch(e) { document.getElementById('no-data').style.display = 'block'; }
+      try {
+        data = JSON.parse(raw);
+        // If URL has a different id, prefer the API response
+        if (urlId && data.evaluation_id && data.evaluation_id !== urlId) data = null;
+      } catch(e) { data = null; }
+    }
+
+    if (data) {
+      render(data);
+    } else if (urlId) {
+      fetch(`/v1/evaluations/${encodeURIComponent(urlId)}`)
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(d => render(d))
+        .catch(() => { document.getElementById('no-data').style.display = 'block'; });
     } else {
       document.getElementById('no-data').style.display = 'block';
     }
 
-    // Colorblind mode (persist via localStorage)
-    if (localStorage.getItem('safe_cb') === '1') document.body.classList.add('cb');
+    // ── Colorblind mode ──────────────────────────────
+    if (sessionStorage.getItem('safe_cb') === '1') document.body.classList.add('cb');
   </script>
 </body>
 </html>

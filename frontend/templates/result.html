@@ -40,11 +40,11 @@ body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:
 .vh-vblock{flex-shrink:0;}
 .vh-verdict{font-family:'Playfair Display',Georgia,serif;font-size:48px;font-weight:700;line-height:1;}
 .vh-verdict.reject{color:#A32D2D;}
-.vh-verdict.hold{color:#854F0B;}
+.vh-verdict.hold{color:#CA8A04;}
 .vh-verdict.approve{color:#3B6D11;}
 .vh-badge{font-size:10px;font-weight:500;padding:3px 10px;border-radius:4px;display:inline-block;margin-top:5px;}
 .vh-badge.reject{background:#FCEBEB;color:#A32D2D;}
-.vh-badge.hold{background:#FAEEDA;color:#854F0B;}
+.vh-badge.hold{background:#FAEEDA;color:#CA8A04;}
 .vh-badge.approve{background:#EAF3DE;color:#3B6D11;}
 .vh-reason{flex:1;}
 .vh-rl{font-size:9px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.35rem;}
@@ -93,7 +93,7 @@ body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:
 /* Overall risk pill — dark bg, white text (Step 5) */
 .ec-risk{font-size:13px;font-weight:700;padding:5px 12px;border-radius:6px;display:inline-block;}
 .ec-risk.hi{background:#A32D2D;color:#ffffff;}
-.ec-risk.md{background:#854F0B;color:#ffffff;}
+.ec-risk.md{background:#CA8A04;color:#ffffff;}
 .ec-risk.lo{background:#3B6D11;color:#ffffff;}
 
 .ec-trigger{font-size:8.5px;margin-top:3px;font-weight:500;}
@@ -113,7 +113,7 @@ body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:
 /* Dimension score tags — light colors unchanged (Step 5) */
 .ds-tag{font-size:8px;font-weight:700;padding:1.5px 7px;border-radius:3px;flex-shrink:0;min-width:32px;text-align:center;}
 .ds-tag.hi{background:#FCEBEB;color:#A32D2D;}
-.ds-tag.md{background:#FAEEDA;color:#854F0B;}
+.ds-tag.md{background:#FAEEDA;color:#CA8A04;}
 .ds-tag.lo{background:#EAF3DE;color:#3B6D11;}
 
 /* Expert colors */
@@ -133,28 +133,30 @@ body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:
 .e3 .ec-trigger,.e3 .ec-expand-btn,.e3 .ds-name{color:#634078;}
 
 /* REGULATORY */
-.reg-list{display:flex;flex-direction:column;gap:6px;}
-.reg-item{display:flex;gap:12px;padding:10px 12px;border-radius:7px;border:0.5px solid #E7E5E4;background:#fff;align-items:flex-start;}
-.reg-sev{font-size:11px;font-weight:700;padding:3px 0;border-radius:4px;flex-shrink:0;width:72px;text-align:center;margin-top:1px;}
+.reg-list{display:flex;flex-direction:column;border:0.5px solid #E7E5E4;border-radius:7px;overflow:hidden;background:#fff;}
+.reg-hdr{display:flex;gap:8px;padding:6px 12px;background:#F5F0EB;border-bottom:0.5px solid #E0E0E0;}
+.reg-hdr-lbl{font-size:7.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#78716C;}
+.reg-row{display:flex;gap:8px;padding:7px 12px;border-bottom:0.5px solid #F0EDE9;align-items:flex-start;}
+.reg-row:last-child{border-bottom:none;}
+.reg-sev{font-size:10px;font-weight:700;padding:2px 0;border-radius:4px;flex-shrink:0;width:62px;text-align:center;}
 .reg-sev.hi{background:#A32D2D;color:#fff;}
-.reg-sev.md{background:#854F0B;color:#fff;}
+.reg-sev.md{background:#CA8A04;color:#fff;}
 .reg-sev.lo{background:#3B6D11;color:#fff;}
-.reg-content{flex:1;min-width:0;}
-.reg-fw{font-size:10px;font-weight:600;color:#1C1917;margin-bottom:2px;}
-.reg-prov{font-size:9.5px;color:#78716C;line-height:1.5;}
-.reg-src{font-size:8px;color:#A8A29E;margin-top:2px;}
+.reg-exp{width:118px;flex-shrink:0;font-size:9px;color:#44403C;font-weight:500;line-height:1.4;}
+.reg-dim{flex:1;font-size:9.5px;color:#1C1917;font-weight:600;line-height:1.4;}
+.reg-anc{width:128px;flex-shrink:0;font-size:8.5px;color:#78716C;line-height:1.4;}
 /* EXPERT RISK TABLE inside verdict hero */
 .vh-risk-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
 .vh-risk-label{font-size:11px;color:#44403C;flex:1;font-weight:500;}
 .vh-risk-badge{font-size:8px;font-weight:700;padding:2px 8px;border-radius:3px;flex-shrink:0;}
 .vh-risk-badge.hi{background:#A32D2D;color:#fff;}
-.vh-risk-badge.md{background:#854F0B;color:#fff;}
+.vh-risk-badge.md{background:#CA8A04;color:#fff;}
 .vh-risk-badge.lo{background:#3B6D11;color:#fff;}
 
 /* EVIDENCE QUALITY */
 .eq-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:0.6rem;}
 .eq-chip{font-size:9px;padding:3px 9px;border-radius:5px;border:0.5px solid #E7E5E4;color:#78716C;background:#fff;}
-.eq-chip.weak{border-color:#FAC775;color:#854F0B;background:#FAEEDA;}
+.eq-chip.weak{border-color:#FAC775;color:#CA8A04;background:#FAEEDA;}
 .eq-note{font-size:9.5px;color:#78716C;line-height:1.5;border-left:2px solid #E7E5E4;padding-left:8px;}
 
 /* TRANSLATION */
@@ -354,30 +356,57 @@ function buildSafeExpertCard(expert,info,idx){
 }
 
 /* ── Build regulatory violations from SAFEEvaluationResponse ── */
+var EXPERT_SHORT={
+  'expert_adversarial_security':'E1 · Adversarial Security',
+  'expert_content_safety':      'E2 · Content Safety',
+  'expert_governance_un':       'E3 · Governance & UN'
+};
+var EXPERT_VIO_ORDER=['expert_adversarial_security','expert_content_safety','expert_governance_un'];
+var LEVEL_ORDER={'HIGH':0,'MEDIUM':1,'LOW':2};
+
 function buildRegViolations(data){
   var items=[];
   (data.experts||[]).forEach(function(ex){
-    var info=SAFE_EXPERT_INFO[ex.id]||{name:ex.id};
     (ex.triggered_dimensions||[]).forEach(function(dim){
       if(dim.level!=='LOW'){
-        items.push({sev:dim.level,fw:dim.regulatory_anchor||dim.display_name,prov:dim.reason||'',src:info.name});
+        items.push({
+          sev:   dim.level,
+          dim:   dim.display_name||dim.name||'',
+          anc:   dim.regulatory_anchor||'',
+          expId: ex.id
+        });
       }
     });
   });
   if(!items.length){
     return '<div style="font-size:9.5px;color:#A8A29E;">No regulatory violations recorded in this evaluation.</div>';
   }
-  return '<div class="reg-list">'+items.map(function(item){
-    var sc=tierCls(item.sev);
-    return '<div class="reg-item">'
-      +'<div class="reg-sev '+sc+'">'+h(tierLabel(item.sev))+'</div>'
-      +'<div class="reg-content">'
-        +'<div class="reg-fw">'+h(item.fw)+'</div>'
-        +'<div class="reg-prov">'+h(item.prov)+'</div>'
-        +'<div class="reg-src">'+h(item.src)+'</div>'
-      +'</div>'
+  items.sort(function(a,b){
+    var ea=EXPERT_VIO_ORDER.indexOf(a.expId); if(ea===-1)ea=99;
+    var eb=EXPERT_VIO_ORDER.indexOf(b.expId); if(eb===-1)eb=99;
+    if(ea!==eb) return ea-eb;
+    return (LEVEL_ORDER[a.sev]||99)-(LEVEL_ORDER[b.sev]||99);
+  });
+  var hdr='<div class="reg-hdr">'
+    +'<div class="reg-hdr-lbl" style="width:62px;flex-shrink:0">Level</div>'
+    +'<div class="reg-hdr-lbl" style="width:118px;flex-shrink:0">Expert</div>'
+    +'<div class="reg-hdr-lbl" style="flex:1">Dimension</div>'
+    +'<div class="reg-hdr-lbl" style="width:128px;flex-shrink:0">Anchor</div>'
     +'</div>';
-  }).join('')+'</div>';
+  var prevExp=null,prevAnc=null;
+  var rows=items.map(function(item){
+    var sc=tierCls(item.sev);
+    var expDisplay=(item.expId!==prevExp)?h(EXPERT_SHORT[item.expId]||item.expId):'';
+    var ancDisplay=(item.expId!==prevExp||item.anc!==prevAnc)?h(item.anc):'';
+    prevExp=item.expId; prevAnc=item.anc;
+    return '<div class="reg-row">'
+      +'<div class="reg-sev '+sc+'">'+h(tierLabel(item.sev))+'</div>'
+      +'<div class="reg-exp">'+expDisplay+'</div>'
+      +'<div class="reg-dim">'+h(item.dim)+'</div>'
+      +'<div class="reg-anc">'+ancDisplay+'</div>'
+    +'</div>';
+  }).join('');
+  return '<div class="reg-list">'+hdr+rows+'</div>';
 }
 
 /* ── Build evidence quality from SAFEEvaluationResponse ── */

@@ -47,13 +47,13 @@ _BADGE_BG = {
 
 # Verdict colours
 _COVER_V = {"REJECT": "#F2A8A8", "HOLD": "#FDE68A", "APPROVE": "#BBF7D0"}
-_INNER_V_TEXT = {"REJECT": "#A32D2D", "HOLD": "#854F0B", "APPROVE": "#3B6D11"}
+_INNER_V_TEXT = {"REJECT": "#A32D2D", "HOLD": "#CA8A04", "APPROVE": "#3B6D11"}
 _INNER_V_BG   = {"REJECT": "#FCEBEB", "HOLD": "#FAEEDA", "APPROVE": "#EAF3DE"}
 
 # Level — solid dark background (inner pages)
-_SEV_SOLID_BG   = {"HIGH": "#A32D2D", "MEDIUM": "#854F0B", "LOW": "#3B6D11"}
+_SEV_SOLID_BG   = {"HIGH": "#A32D2D", "MEDIUM": "#CA8A04", "LOW": "#3B6D11"}
 _SEV_LIGHT_BG   = {"HIGH": "#FCEBEB", "MEDIUM": "#FAEEDA", "LOW": "#EAF3DE"}
-_SEV_LIGHT_TEXT = {"HIGH": "#A32D2D", "MEDIUM": "#854F0B", "LOW": "#3B6D11"}
+_SEV_LIGHT_TEXT = {"HIGH": "#A32D2D", "MEDIUM": "#CA8A04", "LOW": "#3B6D11"}
 
 _EXPERT_COLORS = {
     "expert_adversarial_security": "#3D6070",
@@ -65,6 +65,13 @@ _EXPERT_DISPLAY = {
     "expert_content_safety":       "Expert 2 — Content Safety",
     "expert_governance_un":        "Expert 3 — Governance & UN",
 }
+_EXPERT_SHORT = {
+    "expert_adversarial_security": "E1 · Adversarial Security",
+    "expert_content_safety":       "E2 · Content Safety",
+    "expert_governance_un":        "E3 · Governance & UN",
+}
+_EXPERT_ORDER = ["expert_adversarial_security", "expert_content_safety", "expert_governance_un"]
+_LEVEL_SORT   = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
 _VERDICT_BADGE = {
     "REJECT":  "Do not deploy into UNICC systems",
     "HOLD":    "Human review required",
@@ -270,9 +277,9 @@ def _draw_inner_header(canvas, doc, response: SAFEEvaluationResponse) -> None:
 # ---------------------------------------------------------------------------
 def _exec_summary_page(response: SAFEEvaluationResponse) -> list:
     verdict = response.verdict
-    vtext  = HexColor(_INNER_V_TEXT.get(verdict, "#854F0B"))
+    vtext  = HexColor(_INNER_V_TEXT.get(verdict, "#CA8A04"))
     vbg    = HexColor(_INNER_V_BG.get(verdict,   "#FAEEDA"))
-    vsolid = HexColor(_SEV_SOLID_BG.get(verdict,  "#854F0B"))
+    vsolid = HexColor(_SEV_SOLID_BG.get(verdict,  "#CA8A04"))
     badge_text = _VERDICT_BADGE.get(verdict, "")
     rule_text  = str(response.primary_reason.get(
         "decision_rule_triggered",
@@ -575,19 +582,33 @@ def _regulatory_page(response: SAFEEvaluationResponse) -> list:
     elems: list = []
     elems.append(Paragraph("Regulatory Violations", s_h1))
 
-    rows: list = [["Level", "Expert", "Dimension", "Anchor"]]
+    # Collect all violations, then sort: expert order → level order
+    raw: list = []
     for expert in response.experts:
-        label = _EXPERT_DISPLAY.get(expert.id, expert.id)
         for dim in expert.triggered_dimensions:
-            anchor = (dim.regulatory_anchor[:48] + "…"
+            raw.append((expert.id, dim))
+    raw.sort(key=lambda x: (
+        _EXPERT_ORDER.index(x[0]) if x[0] in _EXPERT_ORDER else 99,
+        _LEVEL_SORT.get(x[1].level, 99),
+    ))
+
+    rows: list = [["Level", "Expert", "Dimension", "Anchor"]]
+    prev_exp_id: str | None = None
+    prev_anchor: str | None = None
+    for exp_id, dim in raw:
+        anchor_raw = (dim.regulatory_anchor[:48] + "…"
                       if len(dim.regulatory_anchor) > 48
                       else dim.regulatory_anchor)
-            rows.append([
-                _esc(dim.level),
-                _esc(label),
-                _esc(dim.display_name),
-                _esc(anchor),
-            ])
+        exp_cell = _EXPERT_SHORT.get(exp_id, exp_id) if exp_id != prev_exp_id else ""
+        anc_cell = anchor_raw if (exp_id != prev_exp_id or anchor_raw != prev_anchor) else ""
+        rows.append([
+            _esc(dim.level),
+            _esc(exp_cell),
+            _esc(dim.display_name),
+            _esc(anc_cell),
+        ])
+        prev_exp_id = exp_id
+        prev_anchor = anchor_raw
 
     if len(rows) == 1:
         elems.append(Paragraph("No regulatory violations detected.", s_none))

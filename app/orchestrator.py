@@ -212,13 +212,15 @@ def run_evaluation(evidence_bundle: EvidenceBundle) -> SAFEEvaluationResponse:
         if arb.get("convergent_risk_note"):
             additional.append(arb["convergent_risk_note"])
 
+        rule_val = arb.get("decision_rule_triggered", "")
         safe_response = SAFEEvaluationResponse(
             evaluation_id=str(_uuid.uuid4()),
             timestamp=datetime.now(timezone.utc).isoformat(),
             safe_version=SAFE_VERSION,
             verdict=verdict,
             primary_reason={
-                "rule": arb.get("decision_rule_triggered", ""),
+                "rule": rule_val,
+                "decision_rule_triggered": rule_val,
                 "expert_summary": arb.get("expert_summary", {}),
             },
             additional_findings=additional,

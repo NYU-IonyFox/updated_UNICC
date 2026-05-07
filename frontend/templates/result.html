@@ -134,14 +134,22 @@ body{font-family:'Inter',sans-serif;background:#F0EDE8;min-height:100vh;display:
 
 /* REGULATORY */
 .reg-list{display:flex;flex-direction:column;gap:6px;}
-.reg-item{display:flex;gap:10px;padding:8px 12px;border-radius:7px;border:0.5px solid #E7E5E4;background:#fff;align-items:flex-start;}
-.reg-sev{font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;min-width:60px;text-align:center;margin-top:1px;}
-.reg-sev.hi{background:#FCEBEB;color:#A32D2D;}
-.reg-sev.md{background:#FAEEDA;color:#854F0B;}
+.reg-item{display:flex;gap:12px;padding:10px 12px;border-radius:7px;border:0.5px solid #E7E5E4;background:#fff;align-items:flex-start;}
+.reg-sev{font-size:11px;font-weight:700;padding:3px 0;border-radius:4px;flex-shrink:0;width:72px;text-align:center;margin-top:1px;}
+.reg-sev.hi{background:#A32D2D;color:#fff;}
+.reg-sev.md{background:#854F0B;color:#fff;}
+.reg-sev.lo{background:#3B6D11;color:#fff;}
 .reg-content{flex:1;min-width:0;}
 .reg-fw{font-size:10px;font-weight:600;color:#1C1917;margin-bottom:2px;}
 .reg-prov{font-size:9.5px;color:#78716C;line-height:1.5;}
 .reg-src{font-size:8px;color:#A8A29E;margin-top:2px;}
+/* EXPERT RISK TABLE inside verdict hero */
+.vh-risk-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+.vh-risk-label{font-size:11px;color:#44403C;flex:1;font-weight:500;}
+.vh-risk-badge{font-size:8px;font-weight:700;padding:2px 8px;border-radius:3px;flex-shrink:0;}
+.vh-risk-badge.hi{background:#A32D2D;color:#fff;}
+.vh-risk-badge.md{background:#854F0B;color:#fff;}
+.vh-risk-badge.lo{background:#3B6D11;color:#fff;}
 
 /* EVIDENCE QUALITY */
 .eq-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:0.6rem;}
@@ -400,6 +408,29 @@ function dlJson(){
   window.open('/v1/evaluations/'+encodeURIComponent(evalId)+'/json','_blank');
 }
 
+/* ── Expert risk level rows ── */
+var EXPERT_SUMMARY_LABELS={
+  'expert_1_security':'Expert 1 · Adversarial Security',
+  'expert_2_content':'Expert 2 · Content Safety',
+  'expert_3_governance':'Expert 3 · Governance &amp; UN'
+};
+var EXPERT_SUMMARY_ORDER=['expert_1_security','expert_2_content','expert_3_governance'];
+
+function buildExpertRiskLevels(expertSummary){
+  if(!expertSummary||!Object.keys(expertSummary).length){
+    return '<div style="font-size:10px;color:#78716C;">No expert summary available.</div>';
+  }
+  return EXPERT_SUMMARY_ORDER.map(function(k){
+    var label=EXPERT_SUMMARY_LABELS[k]||k;
+    var level=(expertSummary[k]||'LOW').toUpperCase();
+    var cls=tierCls(level);
+    return '<div class="vh-risk-row">'
+      +'<span class="vh-risk-label">'+h(label)+'</span>'
+      +'<span class="vh-risk-badge '+cls+'">'+h(tierLabel(level))+'</span>'
+      +'</div>';
+  }).join('');
+}
+
 /* ── Render full result from SAFEEvaluationResponse ── */
 function renderResult(data){
   var verdict=data.verdict||'HOLD';
@@ -410,10 +441,8 @@ function renderResult(data){
   var targetName=sc.target_name||sc.target||'Unnamed';
 
   var pr=data.primary_reason||{};
-  var ruleRef=pr.rule||'—';
+  var ruleRef=pr.decision_rule_triggered||pr.rule||'—';
   var expertSummary=pr.expert_summary||{};
-  var summaryParts=Object.keys(expertSummary).map(function(k){return k+': '+expertSummary[k];});
-  var rationale=summaryParts.length?summaryParts.join(' · '):'Evaluation complete.';
 
   var additionalFindings=data.additional_findings||[];
   var recommendations=data.recommendations||[];
@@ -489,8 +518,8 @@ function renderResult(data){
       +'</div>'
       +'<div class="vh-reason">'
         +'<div class="vh-rl">Expert risk levels</div>'
-        +'<div class="vh-rt">'+h(rationale)+'</div>'
-        +'<div class="vh-rule">Rule '+h(ruleRef)+' triggered &mdash; '+h(vbadgeLabel)+' verdict</div>'
+        +'<div class="vh-rt">'+buildExpertRiskLevels(expertSummary)+'</div>'
+        +'<div class="vh-rule">'+h(ruleRef)+' triggered &mdash; '+h(vbadgeLabel)+' verdict</div>'
       +'</div>'
     +'</div>'
     +'<div class="vh-meta">'
